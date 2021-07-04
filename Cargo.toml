@@ -1,0 +1,13 @@
+[package]
+name = "yolol-devices"
+version = "0.1.0"
+edition = "2018"
+authors = ["alrianne"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+
+[dependencies]
+serde = "1.0.126"
+enum_dispatch = "0.3.7"
+concat-idents = "1.1.3"
