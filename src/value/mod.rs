@@ -7,7 +7,12 @@ pub use self::int::YololInt;
 pub use self::string::YololString;
 
 #[enum_dispatch]
-trait ValueTrait {}
+trait ValueTrait {
+    fn post_inc(&mut self) -> YololValue;
+    fn pre_inc(&mut self) -> YololValue;
+    fn post_dec(&mut self) -> YololValue;
+    fn pre_dec(&mut self) -> YololValue;
+}
 
 #[enum_dispatch(ValueTrait)]
 pub enum YololValue {
@@ -15,8 +20,8 @@ pub enum YololValue {
     Int(YololInt),
 }
 
-impl From<String> for YololValue {
-    fn from(v: String) -> Self {
+impl From<&str> for YololValue {
+    fn from(v: &str) -> Self {
         Self::String(v.into())
     }
 }

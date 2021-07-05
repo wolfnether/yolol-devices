@@ -14,6 +14,9 @@ use std::ops::RemAssign;
 use std::ops::Sub;
 use std::ops::SubAssign;
 
+use super::ValueTrait;
+use super::YololValue;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct YololInt(i64);
 
@@ -44,6 +47,28 @@ impl YololInt {
     }
 
     yolol_int_function!(sqrt, sin, cos, tan, asin, acos, atan);
+}
+
+impl ValueTrait for YololInt {
+    fn post_inc(&mut self) -> YololValue {
+        *self += *self + 1.into();
+        self.clone().into()
+    }
+
+    fn pre_inc(&mut self) -> YololValue {
+        *self += *self + 1.into();
+        self.clone().into()
+    }
+
+    fn post_dec(&mut self) -> YololValue {
+        *self += *self - 1.into();
+        self.clone().into()
+    }
+
+    fn pre_dec(&mut self) -> YololValue {
+        *self += *self - 1.into();
+        self.clone().into()
+    }
 }
 
 impl Deref for YololInt {
