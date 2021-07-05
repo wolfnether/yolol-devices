@@ -17,7 +17,7 @@ use std::ops::SubAssign;
 use super::ValueTrait;
 use super::YololValue;
 
-#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Default)]
 pub struct YololInt(i64);
 
 macro_rules! yolol_int_function {

@@ -1,5 +1,11 @@
 use concat_idents::concat_idents;
+use convert_case::Case;
+use convert_case::Casing;
 use enum_dispatch::enum_dispatch;
+use strum::EnumIter;
+use strum::IntoEnumIterator;
+use yaml_rust::scanner::TokenType;
+use yaml_rust::Yaml;
 
 use crate::field::Field;
 use crate::value::YololValue;
@@ -10,9 +16,12 @@ use crate::value::YololValue;
 pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
+    fn get_device_name(&self) -> String;
+    fn deserialize(&self, yaml: &Yaml) -> Option<Device>;
 }
 
 #[enum_dispatch(DeviceTrait)]
+#[derive(Debug, EnumIter)]
 pub enum Device {
     Button,
     CargoBeam,
@@ -41,31 +50,60 @@ pub enum Device {
     Turntable,
 }
 
+impl Device {
+    pub fn deserialize(yaml: &Yaml) -> Option<Self> {
+        let device_type = if let TokenType::Tag(_, device_type) =
+            yaml.get_tag().expect("Need a type for deserializing")
+        {
+            device_type
+        } else {
+            panic!("Need a type for deserializing")
+        };
+        println!("trying to deserialize {}", device_type);
+        let device = Device::iter().find(|i| i.get_device_name() == device_type)?;
+
+        device.deserialize(yaml)?;
+        Some(device)
+    }
+}
+
 macro_rules! make_device {
-    ($name:ident $(, $fields:ident)+ $(,)?) => {
+    ($name:ident $(, $field:ident)+ $(,)?) => {
+        #[derive(Debug,Default)]
         pub struct $name {
-            $($fields:Field,)+
+            $($field:Field,)+
         }
 
         impl $name{
-            $(pub fn $fields(&self)->&Field{
-                &self.$fields
-            })+
-
             $(
-                concat_idents!(fn_name = $fields,_mut{
+                pub fn $field(&self)->&Field{
+                    &self.$field
+                }
+                concat_idents!(fn_name = $field,_mut{
                     pub fn fn_name (&mut self)->&mut Field{
-                        &mut self.$fields
+                        &mut self.$field
                     }
                 });
             )+
         }
 
         impl DeviceTrait for $name{
+            fn deserialize(&self, yaml: &Yaml) -> Option<Device> {
+                let s = Self::default();
+                $(
+                    println!("trying deserialize field : {}", stringify!($field));
+                    s.$field.deserialize(&yaml[stringify!($field)])?;
+                )+
+                Some(s.into())
+            }
+            fn get_device_name(&self) -> String {
+                stringify!($name).to_string().to_case(Case::Snake)
+            }
+
             fn get_field(&self, field: &str) -> Option<&YololValue>{
                 $(
-                    if self.$fields.name() == field {
-                        return Some(&self.$fields)
+                    if self.$field.name() == field {
+                        return Some(&self.$field)
                     }
                 )+
                 None
@@ -73,8 +111,8 @@ macro_rules! make_device {
 
             fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>{
                 $(
-                    if self.$fields.name() == field {
-                        return Some(&mut self.$fields)
+                    if self.$field.name() == field {
+                        return Some(&mut self.$field)
                     }
                 )+
                 None

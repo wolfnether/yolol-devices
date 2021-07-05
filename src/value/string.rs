@@ -9,7 +9,7 @@ use super::ValueTrait;
 use super::YololInt;
 use super::YololValue;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Default)]
 pub struct YololString(String);
 
 impl ValueTrait for YololString {

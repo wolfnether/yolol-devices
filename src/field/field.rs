@@ -1,8 +1,11 @@
 use std::ops::Deref;
 use std::ops::DerefMut;
 
+use yaml_rust::Yaml;
+
 use crate::value::YololValue;
 
+#[derive(Debug, Default)]
 pub struct Field {
     name: String,
     value: YololValue,
@@ -17,6 +20,15 @@ impl Field {
     /// Set the field's name.
     pub fn set_name(&mut self, name: String) {
         self.name = name;
+    }
+
+    pub fn deserialize(&self, yaml: &Yaml) -> Option<()> {
+        if let Some(v) = yaml.as_f64(){
+            panic!("f {}", v);
+        } else if let Some(v) = yaml.as_str(){
+            panic!("s {}", v);
+        }
+        Some(())
     }
 }
 

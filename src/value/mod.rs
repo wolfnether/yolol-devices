@@ -25,6 +25,12 @@ pub enum YololValue {
     Int(YololInt),
 }
 
+impl Default for YololValue {
+    fn default() -> Self {
+        YololInt::default().into()
+    }
+}
+
 impl YololValue {
     fn is_string(&self) -> bool {
         match self {
@@ -32,7 +38,6 @@ impl YololValue {
             YololValue::Int(_) => false,
         }
     }
-
 }
 
 impl From<&str> for YololValue {
