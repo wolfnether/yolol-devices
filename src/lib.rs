@@ -16,7 +16,9 @@ struct Networks {
 }
 
 impl Networks {
-    pub fn deserialize(yaml: &Yaml) -> Option<Self> {
+    pub fn deserialize(path: &str) -> Option<Self> {
+        let file = std::fs::read_to_string(path).ok()?;
+        let yaml = yaml_rust::YamlLoader::load_from_str(&file).ok()?[0];
         println!("Deserialize file version : {}", yaml["version"].as_str()?);
         let mut networks = BTreeMap::new();
         for network in yaml["networks"].as_vec()?.iter() {
@@ -24,12 +26,7 @@ impl Networks {
 
             println!("deserialize network : {}", name);
 
-            let network = Network::deserialize(network);
-            if let Some(network) = network {
-                networks.insert(name.to_string(), network);
-            } else {
-                println!("ignored maybe empty or an error happend");
-            }
+            networks.insert(name.to_string(), Network::deserialize(network));
         }
         let mut relays = vec![];
         for relay in yaml["relays"].as_vec()?.iter() {
@@ -60,19 +57,16 @@ struct Network {
 }
 
 impl Network {
-    pub fn deserialize(yaml: &Yaml) -> Option<Self> {
+    pub fn deserialize(yaml: &Yaml) -> Self {
         let mut devices = vec![];
-        for i in yaml["devices"].as_vec()?.iter() {
-            devices.push(Device::deserialize(i)?);
+        if let Some(v) = yaml["devices"].as_vec() {
+            for i in v.iter() {
+                let device = Device::deserialize(i);
+                if let Some(device) = device {
+                    devices.push(device);
+                }
+            }
         }
-        Some(Self { devices })
+        Self { devices }
     }
-}
-
-#[test]
-fn deserialize() {
-    let file = std::fs::read_to_string("all.yaml").unwrap();
-    let docs = yaml_rust::YamlLoader::load_from_str(&file).unwrap();
-
-    println!("{:#?}", Networks::deserialize(&docs[0]));
 }
