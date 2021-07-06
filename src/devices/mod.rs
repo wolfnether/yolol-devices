@@ -16,7 +16,7 @@ use crate::value::YololValue;
 //thx https://github.com/martindevans/YololShipSystemSpec
 
 #[enum_dispatch]
-pub trait DeviceTrait<R:CodeRunner+ Default> {
+pub trait DeviceTrait<R: CodeRunner + Default> {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
@@ -25,7 +25,7 @@ pub trait DeviceTrait<R:CodeRunner+ Default> {
 
 #[enum_dispatch(DeviceTrait<R>)]
 #[derive(Debug, EnumIter)]
-pub enum Device<R:CodeRunner+ Default> {
+pub enum Device<R: CodeRunner + Default> {
     Button,
     CargoBeam,
     CargoLockFrame,
@@ -53,7 +53,7 @@ pub enum Device<R:CodeRunner+ Default> {
     Turntable,
 }
 
-impl<R:CodeRunner+ Default> Device<R> {
+impl<R: CodeRunner + Default> Device<R> {
     pub fn deserialize(yaml: &Yaml) -> Option<Self> {
         let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);

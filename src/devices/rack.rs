@@ -1,10 +1,11 @@
-use super::chip::{Chip, CodeRunner};
+use super::chip::Chip;
+use super::chip::CodeRunner;
 use super::DeviceTrait;
 use crate::deserialize_field_name;
 use crate::field::Field;
 
 #[derive(Debug, Default)]
-pub struct Rack<R:CodeRunner+ Default> {
+pub struct Rack<R: CodeRunner + Default> {
     current_state: Field,
     on_state: Field,
     off_state: Field,
@@ -14,19 +15,19 @@ pub struct Rack<R:CodeRunner+ Default> {
 }
 
 #[derive(Debug)]
-enum RackModule<R:CodeRunner+ Default> {
+enum RackModule<R: CodeRunner + Default> {
     Core(Chip<R>, Chip<R>, Chip<R>),
     Socket(Chip<R>, Chip<R>),
     Reader(Chip<R>),
 }
 
-impl<R:CodeRunner+ Default> Default for RackModule<R> {
+impl<R: CodeRunner + Default> Default for RackModule<R> {
     fn default() -> Self {
         Self::Reader(Chip::default())
     }
 }
 
-impl<R:CodeRunner + Default> DeviceTrait<R> for Rack<R> {
+impl<R: CodeRunner + Default> DeviceTrait<R> for Rack<R> {
     fn get_field(&self, field: &str) -> Option<&crate::value::YololValue> {
         if self.current_state.name() == field {
             return Some(&self.current_state);

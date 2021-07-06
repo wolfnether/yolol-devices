@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use devices::Device;
 use devices::chip::CodeRunner;
+use devices::Device;
 use yaml_rust::yaml::Hash;
 use yaml_rust::Yaml;
 
@@ -10,13 +10,13 @@ pub mod field;
 pub mod value;
 
 #[derive(Debug)]
-pub struct Networks<R:CodeRunner+ Default> {
+pub struct Networks<R: CodeRunner + Default> {
     networks: BTreeMap<String, Network<R>>,
 
     relays: Vec<(String, String)>,
 }
 
-impl<R:CodeRunner+ Default> Networks<R> {
+impl<R: CodeRunner + Default> Networks<R> {
     pub fn deserialize(path: &str) -> Option<Self> {
         let file = std::fs::read_to_string(path).ok()?;
         let yaml = &yaml_rust::YamlLoader::load_from_str(&file).ok()?[0];
@@ -53,11 +53,11 @@ fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
 }
 
 #[derive(Debug)]
-pub struct Network<R:CodeRunner+ Default> {
+pub struct Network<R: CodeRunner + Default> {
     devices: Vec<Device<R>>,
 }
 
-impl<R:CodeRunner+ Default> Network<R> {
+impl<R: CodeRunner + Default> Network<R> {
     pub fn deserialize(yaml: &Yaml) -> Self {
         let mut devices = vec![];
         if let Some(v) = yaml["devices"].as_vec() {
