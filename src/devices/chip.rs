@@ -1,3 +1,5 @@
+use yaml_rust::Yaml;
+
 use crate::field::Field;
 
 #[derive(Debug)]
@@ -8,10 +10,14 @@ pub enum Chip {
 }
 
 impl Chip {
-    pub fn new(chip_type: &str) -> Self {
+    pub fn new(chip_type: &str, yaml: &Yaml) -> Self {
         match chip_type {
             "memory_chip" => Self::Memory(MemoryChip::default()),
-            "yolol_chip" => Self::Yolol(YololChip::default()),
+            "yolol_chip" => {
+                let chip = YololChip::default();
+                chip.path = yaml["path"].as_str().map(|s| s.to_string());
+                Self::Yolol(chip)
+            },
             _ => Self::None,
         }
     }
@@ -23,7 +29,7 @@ pub struct MemoryChip {}
 #[derive(Debug, Default)]
 pub struct YololChip {
     chip_wait: Field,
-    //TODO something
+    path: Option<String>,
 }
 
 impl Default for Chip {

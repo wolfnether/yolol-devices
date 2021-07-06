@@ -91,12 +91,12 @@ impl DeviceTrait for Rack {
             match tag.as_str() {
                 "socker_core" => {
                     let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot1"])
                     } else {
                         Chip::None
                     };
                     let chip2 = if let Some(TokenType::Tag(_, tag)) = modules["slot2"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot2"])
                     } else {
                         Chip::None
                     };
@@ -105,17 +105,17 @@ impl DeviceTrait for Rack {
                 }
                 "chip_core" => {
                     let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot2"])
                     } else {
                         Chip::None
                     };
                     let chip2 = if let Some(TokenType::Tag(_, tag)) = modules["slot2"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot2"])
                     } else {
                         Chip::None
                     };
                     let chip3 = if let Some(TokenType::Tag(_, tag)) = modules["slot3"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot2"])
                     } else {
                         Chip::None
                     };
@@ -124,7 +124,7 @@ impl DeviceTrait for Rack {
                 }
                 "chip_reader" => {
                     let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag)
+                        Chip::new(&tag, modules["slot2"])
                     } else {
                         Chip::None
                     };
