@@ -1,5 +1,6 @@
 use super::chip::Chip;
 use super::DeviceTrait;
+use crate::deserialize_field_name;
 use crate::field::Field;
 
 #[derive(Debug, Default)]
@@ -63,26 +64,10 @@ impl DeviceTrait for Rack {
     }
 
     fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> super::Device {
-        let mut name = "CurrentState";
-        if let Some(_name) = yaml[name].as_str() {
-            name = _name;
-        }
-        self.current_state.set_name(name.into());
-        let mut name = "OnState";
-        if let Some(_name) = yaml[name].as_str() {
-            name = _name;
-        }
-        self.on_state.set_name(name.into());
-        let mut name = "OffState";
-        if let Some(_name) = yaml[name].as_str() {
-            name = _name;
-        }
-        self.off_state.set_name(name.into());
-        let mut name = "ButtonStyle";
-        if let Some(_name) = yaml[name].as_str() {
-            name = _name;
-        }
-        self.button.set_name(name.into());
+        deserialize_field_name!(self, current_state, yaml);
+        deserialize_field_name!(self, on_state, yaml);
+        deserialize_field_name!(self, off_state, yaml);
+        deserialize_field_name!(self, button, yaml);
 
         if let Some(tag) = yaml["module"].get_tag() {
             let modules = &yaml["module"];

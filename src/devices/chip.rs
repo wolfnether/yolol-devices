@@ -1,5 +1,6 @@
 use yaml_rust::Yaml;
 
+use crate::deserialize_field_name;
 use crate::field::Field;
 
 #[derive(Debug)]
@@ -15,7 +16,8 @@ impl Chip {
             "memory_chip" => Self::Memory(MemoryChip::default()),
             "yolol_chip" => {
                 let mut chip = YololChip::default();
-                chip.path = yaml["path"].as_str().map(|s| s.to_string());
+                chip.path = yaml["script"].as_str().map(|s| s.to_string());
+                deserialize_field_name!(chip, chip_wait, yaml);
                 Self::Yolol(chip)
             }
             _ => Self::None,
