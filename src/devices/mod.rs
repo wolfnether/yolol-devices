@@ -67,7 +67,7 @@ macro_rules! deserialize_field_name {
     ($device:ident, $name:ident, $yaml:ident) => {{
         use convert_case::Case;
         use convert_case::Casing;
-        let name = stringify!($field).to_case(Case::Pascal);
+        let name = stringify!($name).to_case(Case::Pascal);
         $device.$name.set_name(
             $yaml[name.as_str()]
                 .as_str()
