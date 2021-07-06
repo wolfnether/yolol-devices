@@ -62,7 +62,7 @@ impl DeviceTrait for Rack {
         "rack".to_string()
     }
 
-    fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> Option<super::Device> {
+    fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> super::Device {
         let mut name = "CurrentState";
         if let Some(_name) = yaml[name].as_str() {
             name = _name;
@@ -88,44 +88,38 @@ impl DeviceTrait for Rack {
             let modules = &yaml["module"];
             match tag {
                 "socker_core" => {
-                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot1"])
-                    } else {
-                        Chip::None
-                    };
-                    let chip2 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot2"])
-                    } else {
-                        Chip::None
-                    };
+                    let chip1 = modules["slot1"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                        .unwrap_or(Chip::None);
+                    let chip2 = modules["slot2"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot2"]))
+                        .unwrap_or(Chip::None);
                     let rack_module = RackModule::Socket(chip1, chip2);
                     self.module = rack_module;
                 }
                 "chip_core" => {
-                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot1"])
-                    } else {
-                        Chip::None
-                    };
-                    let chip2 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot2"])
-                    } else {
-                        Chip::None
-                    };
-                    let chip3 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot3"])
-                    } else {
-                        Chip::None
-                    };
+                    let chip1 = modules["slot1"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                        .unwrap_or(Chip::None);
+                    let chip2 = modules["slot2"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot2"]))
+                        .unwrap_or(Chip::None);
+                    let chip3 = modules["slot3"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot3"]))
+                        .unwrap_or(Chip::None);
                     let rack_module = RackModule::Core(chip1, chip2, chip3);
                     self.module = rack_module;
                 }
                 "chip_reader" => {
-                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, &modules["slot1"])
-                    } else {
-                        Chip::None
-                    };
+                    let chip1 = modules["slot1"]
+                        .get_tag()
+                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                        .unwrap_or(Chip::None);
                     let rack_module = RackModule::Reader(chip1);
                     self.module = rack_module;
                 }
@@ -133,6 +127,6 @@ impl DeviceTrait for Rack {
             }
         }
 
-        Some(self.into())
+        self.into()
     }
 }

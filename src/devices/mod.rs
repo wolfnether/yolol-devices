@@ -19,7 +19,7 @@ pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(self, yaml: &Yaml) -> Option<Device>;
+    fn deserialize(self, yaml: &Yaml) -> Device;
 }
 
 #[enum_dispatch(DeviceTrait)]
@@ -58,7 +58,7 @@ impl Device {
         println!("trying to deserialize {}", device_type);
         let device = Device::iter().find(|i| i.get_device_name() == device_type)?;
 
-        Some(device.deserialize(yaml)?)
+        Some(device.deserialize(yaml))
     }
 }
 
@@ -83,7 +83,7 @@ macro_rules! make_device {
         }
 
         impl DeviceTrait for $name{
-            fn deserialize(mut self, yaml: &Yaml) -> Option<Device> {
+            fn deserialize(mut self, yaml: &Yaml) -> Device {
                 $(
                     let mut name = stringify!($field).to_case(Case::Pascal);
                     if let Some(_name) = yaml[name.as_str()].as_str(){
@@ -91,7 +91,7 @@ macro_rules! make_device {
                     }
                     self.$field.set_name(name);
                 )+
-                Some(self.into())
+                self.into()
             }
             fn get_device_name(&self) -> String {
                 stringify!($name).to_string().to_case(Case::Snake)
