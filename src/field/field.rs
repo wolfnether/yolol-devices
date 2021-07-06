@@ -1,8 +1,6 @@
 use std::ops::Deref;
 use std::ops::DerefMut;
 
-use yaml_rust::Yaml;
-
 use crate::value::YololValue;
 
 #[derive(Debug, Default)]

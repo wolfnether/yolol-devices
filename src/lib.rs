@@ -9,7 +9,7 @@ pub mod field;
 pub mod value;
 
 #[derive(Debug)]
-struct Networks {
+pub struct Networks {
     networks: BTreeMap<String, Network>,
 
     relays: Vec<(String, String)>,
@@ -18,7 +18,7 @@ struct Networks {
 impl Networks {
     pub fn deserialize(path: &str) -> Option<Self> {
         let file = std::fs::read_to_string(path).ok()?;
-        let yaml = yaml_rust::YamlLoader::load_from_str(&file).ok()?[0];
+        let yaml = &yaml_rust::YamlLoader::load_from_str(&file).ok()?[0];
         println!("Deserialize file version : {}", yaml["version"].as_str()?);
         let mut networks = BTreeMap::new();
         for network in yaml["networks"].as_vec()?.iter() {
@@ -52,7 +52,7 @@ fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
 }
 
 #[derive(Debug)]
-struct Network {
+pub struct Network {
     devices: Vec<Device>,
 }
 
