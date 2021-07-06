@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
 use devices::Device;
-use yaml_rust::Yaml;
 use yaml_rust::yaml::Hash;
+use yaml_rust::Yaml;
 
 pub mod devices;
 pub mod field;
@@ -25,30 +25,30 @@ impl Networks {
             println!("deserialize network : {}", name);
 
             let network = Network::deserialize(network);
-            if let Some(network) = network{
-                networks.insert(
-                    name.to_string(),
-                    network
-                );
+            if let Some(network) = network {
+                networks.insert(name.to_string(), network);
             } else {
                 println!("ignored maybe empty or an error happend");
             }
         }
         let mut relays = vec![];
-        for relay in yaml["relays"].as_vec()?.iter(){
-            let src = get_value(relay["src"].as_hash()?, "name")?.as_str()?.to_string();
-            let dst = get_value(relay["dst"].as_hash()?, "name")?.as_str()?.to_string();
-            relays.push((src,dst));
+        for relay in yaml["relays"].as_vec()?.iter() {
+            let src = get_value(relay["src"].as_hash()?, "name")?
+                .as_str()?
+                .to_string();
+            let dst = get_value(relay["dst"].as_hash()?, "name")?
+                .as_str()?
+                .to_string();
+            relays.push((src, dst));
         }
         Some(Self { networks, relays })
     }
 }
 
-fn get_value<'a>(hashmap:&'a Hash,key: &str) -> Option<&'a Yaml>{
-    for (k,v) in hashmap{
-        println!("{:?} {:?}",k,v);
-        if k.as_str()? == key{
-            return Some(v)
+fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
+    for (k, v) in hashmap {
+        if k.as_str()? == key {
+            return Some(v);
         }
     }
     None
@@ -67,4 +67,12 @@ impl Network {
         }
         Some(Self { devices })
     }
+}
+
+#[test]
+fn deserialize() {
+    let file = std::fs::read_to_string("all.yaml").unwrap();
+    let docs = yaml_rust::YamlLoader::load_from_str(&file).unwrap();
+
+    println!("{:#?}", Networks::deserialize(&docs[0]));
 }

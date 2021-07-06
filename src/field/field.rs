@@ -21,15 +21,6 @@ impl Field {
     pub fn set_name(&mut self, name: String) {
         self.name = name;
     }
-
-    pub fn deserialize(&self, yaml: &Yaml) -> Option<()> {
-        if let Some(v) = yaml.as_f64(){
-            panic!("f {}", v);
-        } else if let Some(v) = yaml.as_str(){
-            panic!("s {}", v);
-        }
-        Some(())
-    }
 }
 
 impl Deref for Field {

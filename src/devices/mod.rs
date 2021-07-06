@@ -1,3 +1,5 @@
+mod chip;
+mod rack;
 use concat_idents::concat_idents;
 use convert_case::Case;
 use convert_case::Casing;
@@ -7,6 +9,7 @@ use strum::IntoEnumIterator;
 use yaml_rust::scanner::TokenType;
 use yaml_rust::Yaml;
 
+pub use self::rack::Rack;
 use crate::field::Field;
 use crate::value::YololValue;
 
@@ -17,7 +20,7 @@ pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(&self, yaml: &Yaml) -> Option<Device>;
+    fn deserialize(self, yaml: &Yaml) -> Option<Device>;
 }
 
 #[enum_dispatch(DeviceTrait)]
@@ -62,8 +65,7 @@ impl Device {
         println!("trying to deserialize {}", device_type);
         let device = Device::iter().find(|i| i.get_device_name() == device_type)?;
 
-        device.deserialize(yaml)?;
-        Some(device)
+        Some(device.deserialize(yaml)?)
     }
 }
 
@@ -88,13 +90,15 @@ macro_rules! make_device {
         }
 
         impl DeviceTrait for $name{
-            fn deserialize(&self, yaml: &Yaml) -> Option<Device> {
-                let s = Self::default();
+            fn deserialize(mut self, yaml: &Yaml) -> Option<Device> {
                 $(
-                    println!("trying deserialize field : {}", stringify!($field));
-                    s.$field.deserialize(&yaml[stringify!($field)])?;
+                    let mut name = stringify!($field).to_case(Case::Pascal);
+                    if let Some(_name) = yaml[name.as_str()].as_str(){
+                        name = _name.to_string();
+                    }
+                    self.$field.set_name(name);
                 )+
-                Some(s.into())
+                Some(self.into())
             }
             fn get_device_name(&self) -> String {
                 stringify!($name).to_string().to_case(Case::Snake)
@@ -253,7 +257,6 @@ make_device!(
 );
 make_device!(MiningLaser, mining_laser_on, mining_laser_beam_length);
 make_device!(ModularDisplay, panel_value);
-make_device!(Rack, current_state, on_state, off_state, button_style);
 make_device!(
     RadioReceiver,
     message,
