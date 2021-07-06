@@ -1,32 +1,32 @@
-use super::chip::Chip;
+use super::chip::{Chip, CodeRunner};
 use super::DeviceTrait;
 use crate::deserialize_field_name;
 use crate::field::Field;
 
 #[derive(Debug, Default)]
-pub struct Rack {
+pub struct Rack<R:CodeRunner+ Default> {
     current_state: Field,
     on_state: Field,
     off_state: Field,
     button: Field,
 
-    module: RackModule,
+    module: RackModule<R>,
 }
 
 #[derive(Debug)]
-enum RackModule {
-    Core(Chip, Chip, Chip),
-    Socket(Chip, Chip),
-    Reader(Chip),
+enum RackModule<R:CodeRunner+ Default> {
+    Core(Chip<R>, Chip<R>, Chip<R>),
+    Socket(Chip<R>, Chip<R>),
+    Reader(Chip<R>),
 }
 
-impl Default for RackModule {
+impl<R:CodeRunner+ Default> Default for RackModule<R> {
     fn default() -> Self {
         Self::Reader(Chip::default())
     }
 }
 
-impl DeviceTrait for Rack {
+impl<R:CodeRunner + Default> DeviceTrait<R> for Rack<R> {
     fn get_field(&self, field: &str) -> Option<&crate::value::YololValue> {
         if self.current_state.name() == field {
             return Some(&self.current_state);
@@ -63,7 +63,7 @@ impl DeviceTrait for Rack {
         "rack".to_string()
     }
 
-    fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> super::Device {
+    fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> super::Device<R> {
         deserialize_field_name!(self, current_state, yaml);
         deserialize_field_name!(self, on_state, yaml);
         deserialize_field_name!(self, off_state, yaml);

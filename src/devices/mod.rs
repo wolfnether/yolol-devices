@@ -1,4 +1,4 @@
-mod chip;
+pub mod chip;
 mod rack;
 use concat_idents::concat_idents;
 use convert_case::Case;
@@ -8,6 +8,7 @@ use strum::EnumIter;
 use strum::IntoEnumIterator;
 use yaml_rust::Yaml;
 
+use self::chip::CodeRunner;
 pub use self::rack::Rack;
 use crate::field::Field;
 use crate::value::YololValue;
@@ -15,16 +16,16 @@ use crate::value::YololValue;
 //thx https://github.com/martindevans/YololShipSystemSpec
 
 #[enum_dispatch]
-pub trait DeviceTrait {
+pub trait DeviceTrait<R:CodeRunner+ Default> {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(self, yaml: &Yaml) -> Device;
+    fn deserialize(self, yaml: &Yaml) -> Device<R>;
 }
 
-#[enum_dispatch(DeviceTrait)]
+#[enum_dispatch(DeviceTrait<R>)]
 #[derive(Debug, EnumIter)]
-pub enum Device {
+pub enum Device<R:CodeRunner+ Default> {
     Button,
     CargoBeam,
     CargoLockFrame,
@@ -39,7 +40,7 @@ pub enum Device {
     MainFlightComputer,
     MiningLaser,
     ModularDisplay,
-    Rack,
+    Rack(Rack<R>),
     RadioReceiver,
     RadioTransmitter,
     RailRelay,
@@ -52,7 +53,7 @@ pub enum Device {
     Turntable,
 }
 
-impl Device {
+impl<R:CodeRunner+ Default> Device<R> {
     pub fn deserialize(yaml: &Yaml) -> Option<Self> {
         let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
@@ -97,8 +98,8 @@ macro_rules! make_device {
             )+
         }
 
-        impl DeviceTrait for $name{
-            fn deserialize(mut self, yaml: &Yaml) -> Device {
+        impl<R:CodeRunner+ Default> DeviceTrait<R> for $name{
+            fn deserialize(mut self, yaml: &Yaml) -> Device<R> {
                 $(deserialize_field_name!(self, $field, yaml);)+
                 self.into()
             }

@@ -4,13 +4,13 @@ use crate::deserialize_field_name;
 use crate::field::Field;
 
 #[derive(Debug)]
-pub enum Chip {
+pub enum Chip<R: CodeRunner + Default> {
     None,
     Memory(MemoryChip),
-    Yolol(YololChip),
+    Yolol(YololChip<R>),
 }
 
-impl Chip {
+impl<R: CodeRunner + Default> Chip<R> {
     pub fn new(chip_type: &str, yaml: &Yaml) -> Self {
         match chip_type {
             "memory_chip" => Self::Memory(MemoryChip::default()),
@@ -29,13 +29,25 @@ impl Chip {
 pub struct MemoryChip {}
 
 #[derive(Debug, Default)]
-pub struct YololChip {
+pub struct YololChip<R: CodeRunner + Default> {
     chip_wait: Field,
     path: Option<String>,
+    code: Option<R>,
 }
 
-impl Default for Chip {
+impl<R: CodeRunner + Default> Default for Chip<R> {
     fn default() -> Self {
         Self::None
     }
+}
+
+pub trait CodeRunner {
+    fn compile(path: &str);
+    fn step();
+}
+
+pub struct NoneRunner;
+impl CodeRunner for NoneRunner {
+    fn compile(_: &str) {}
+    fn step() {}
 }
