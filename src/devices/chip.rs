@@ -2,6 +2,8 @@ use yaml_rust::Yaml;
 
 use crate::deserialize_field_name;
 use crate::field::Field;
+use crate::Network;
+use crate::Networks;
 
 #[derive(Debug)]
 pub enum Chip<R: CodeRunner + Default> {
@@ -41,13 +43,14 @@ impl<R: CodeRunner + Default> Default for Chip<R> {
     }
 }
 
-pub trait CodeRunner {
-    fn compile(path: &str);
-    fn step();
+pub trait CodeRunner: Default {
+    fn compile(&mut self, path: &str);
+    fn step(&self, networks: &mut Networks<Self>, network: &Network<Self>);
 }
 
+#[derive(Default)]
 pub struct NoneRunner;
 impl CodeRunner for NoneRunner {
-    fn compile(_: &str) {}
-    fn step() {}
+    fn compile(&mut self, _: &str) {}
+    fn step(&self, _: &mut Networks<Self>, _: &Network<Self>) {}
 }
