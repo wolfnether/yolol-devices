@@ -1,5 +1,3 @@
-use yaml_rust::scanner::TokenType;
-
 use super::chip::Chip;
 use super::DeviceTrait;
 use crate::field::Field;
@@ -86,17 +84,17 @@ impl DeviceTrait for Rack {
         }
         self.button.set_name(name.into());
 
-        if let Some(TokenType::Tag(_, tag)) = yaml["module"].get_tag() {
+        if let Some(tag) = yaml["module"].get_tag() {
             let modules = &yaml["module"];
-            match tag.as_str() {
+            match tag {
                 "socker_core" => {
-                    let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, modules["slot1"])
+                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot1"])
                     } else {
                         Chip::None
                     };
-                    let chip2 = if let Some(TokenType::Tag(_, tag)) = modules["slot2"].get_tag() {
-                        Chip::new(&tag, modules["slot2"])
+                    let chip2 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot2"])
                     } else {
                         Chip::None
                     };
@@ -104,18 +102,18 @@ impl DeviceTrait for Rack {
                     self.module = rack_module;
                 }
                 "chip_core" => {
-                    let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, modules["slot2"])
+                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot1"])
                     } else {
                         Chip::None
                     };
-                    let chip2 = if let Some(TokenType::Tag(_, tag)) = modules["slot2"].get_tag() {
-                        Chip::new(&tag, modules["slot2"])
+                    let chip2 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot2"])
                     } else {
                         Chip::None
                     };
-                    let chip3 = if let Some(TokenType::Tag(_, tag)) = modules["slot3"].get_tag() {
-                        Chip::new(&tag, modules["slot2"])
+                    let chip3 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot3"])
                     } else {
                         Chip::None
                     };
@@ -123,8 +121,8 @@ impl DeviceTrait for Rack {
                     self.module = rack_module;
                 }
                 "chip_reader" => {
-                    let chip1 = if let Some(TokenType::Tag(_, tag)) = modules["slot1"].get_tag() {
-                        Chip::new(&tag, modules["slot2"])
+                    let chip1 = if let Some(tag) = modules["slot1"].get_tag() {
+                        Chip::new(&tag, &modules["slot1"])
                     } else {
                         Chip::None
                     };

@@ -6,7 +6,6 @@ use convert_case::Casing;
 use enum_dispatch::enum_dispatch;
 use strum::EnumIter;
 use strum::IntoEnumIterator;
-use yaml_rust::scanner::TokenType;
 use yaml_rust::Yaml;
 
 pub use self::rack::Rack;
@@ -55,13 +54,7 @@ pub enum Device {
 
 impl Device {
     pub fn deserialize(yaml: &Yaml) -> Option<Self> {
-        let device_type = if let TokenType::Tag(_, device_type) =
-            yaml.get_tag().expect("Need a type for deserializing")
-        {
-            device_type
-        } else {
-            panic!("Need a type for deserializing")
-        };
+        let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
         let device = Device::iter().find(|i| i.get_device_name() == device_type)?;
 

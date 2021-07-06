@@ -14,10 +14,10 @@ impl Chip {
         match chip_type {
             "memory_chip" => Self::Memory(MemoryChip::default()),
             "yolol_chip" => {
-                let chip = YololChip::default();
+                let mut chip = YololChip::default();
                 chip.path = yaml["path"].as_str().map(|s| s.to_string());
                 Self::Yolol(chip)
-            },
+            }
             _ => Self::None,
         }
     }
