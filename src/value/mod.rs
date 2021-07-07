@@ -2,6 +2,7 @@ mod int;
 mod string;
 
 use std::convert::TryInto;
+use std::fmt::Display;
 use std::ops::Add;
 use std::ops::Sub;
 
@@ -120,6 +121,15 @@ impl Sub for YololValue {
             let a: YololInt = self.try_into().unwrap();
             let b: YololInt = rhs.try_into().unwrap();
             (a - b).into()
+        }
+    }
+}
+
+impl Display for YololValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            YololValue::String(v) => write!(f, "{}", v),
+            YololValue::Int(v) => write!(f, "{}", v),
         }
     }
 }

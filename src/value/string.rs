@@ -1,3 +1,4 @@
+use std::fmt::Display;
 use std::ops::Add;
 use std::ops::AddAssign;
 use std::ops::Deref;
@@ -106,6 +107,12 @@ impl AddAssign for YololString {
 impl SubAssign for YololString {
     fn sub_assign(&mut self, rhs: YololString) {
         *self = self.clone() - rhs
+    }
+}
+
+impl Display for YololString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 
