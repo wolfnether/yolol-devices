@@ -43,6 +43,12 @@ impl ValueTrait for YololString {
     }
 }
 
+impl Into<bool> for YololString {
+    fn into(self) -> bool {
+        !self.0.is_empty()
+    }
+}
+
 impl Deref for YololString {
     type Target = String;
 

@@ -187,6 +187,12 @@ impl Display for YololInt {
     }
 }
 
+impl Into<bool> for YololInt {
+    fn into(self) -> bool {
+        self.0 != 0
+    }
+}
+
 macro_rules! yolol_int_test {
     ($n:ident,$a:expr,$op:tt,$b:expr) => {
         #[test]

@@ -12,7 +12,7 @@ pub use self::int::YololInt;
 pub use self::string::YololString;
 
 #[enum_dispatch]
-trait ValueTrait {
+trait ValueTrait: Into<bool> {
     fn post_inc(&mut self) -> YololValue;
     fn pre_inc(&mut self) -> YololValue;
     fn post_dec(&mut self) -> YololValue;
@@ -24,6 +24,15 @@ trait ValueTrait {
 pub enum YololValue {
     String(YololString),
     Int(YololInt),
+}
+
+impl Into<bool> for YololValue {
+    fn into(self) -> bool {
+        match self {
+            YololValue::String(v) => v.into(),
+            YololValue::Int(v) => v.into(),
+        }
+    }
 }
 
 impl Default for YololValue {
@@ -62,6 +71,16 @@ impl From<f32> for YololValue {
 impl From<f64> for YololValue {
     fn from(v: f64) -> Self {
         Self::Int(v.into())
+    }
+}
+
+impl YololValue {
+    pub fn or(&self, rhs: Self) -> Self {
+        YololInt::from(self.clone().into() || rhs.into()).into()
+    }
+
+    pub fn and(&self, rhs: Self) -> Self {
+        YololInt::from(self.clone().into() && rhs.into()).into()
     }
 }
 
