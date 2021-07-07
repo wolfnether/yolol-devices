@@ -45,12 +45,12 @@ impl<R: CodeRunner + Default> Default for Chip<R> {
 
 pub trait CodeRunner: Default {
     fn parse(&mut self, path: &str);
-    fn step(&self);
+    fn step(&mut self);
 }
 
 #[derive(Default)]
 pub struct NoneRunner;
 impl CodeRunner for NoneRunner {
     fn parse(&mut self, _: &str) {}
-    fn step(&self) {}
+    fn step(&mut self) {}
 }
