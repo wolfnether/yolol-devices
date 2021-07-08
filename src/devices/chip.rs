@@ -32,6 +32,8 @@ impl<R: CodeRunner + Default> Chip<R> {
                 let mut runner = R::default();
                 if runner.parse(&path).is_some() {
                     chip.runner = Some(runner);
+                } else {
+                    println!("cannot find file {}", path);
                 }
             }
         }
