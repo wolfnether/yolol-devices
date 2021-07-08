@@ -10,7 +10,7 @@ use std::ops::Sub;
 use super::ValueTrait;
 use super::YololValue;
 
-#[derive(Clone, Copy, Debug,Default)]
+#[derive(Clone, Copy, Debug, Default)]
 pub struct YololInt(i64);
 
 impl YololInt {
@@ -19,13 +19,13 @@ impl YololInt {
     }
 }
 
-impl PartialEq for YololInt{
+impl PartialEq for YololInt {
     fn eq(&self, other: &Self) -> bool {
         self.0.eq(&other.0)
     }
 }
 
-impl PartialOrd for YololInt{
+impl PartialOrd for YololInt {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.0.partial_cmp(&other.0)
     }
@@ -115,7 +115,7 @@ impl ValueTrait for YololInt {
     fn tan(&self) -> Option<YololValue> {
         let sin = self.sin()?;
         let cos = self.cos()?;
-        if cos == 0.into(){
+        if cos == 0.into() {
             Some(Self(-22877332428).into())
         } else {
             sin / cos

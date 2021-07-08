@@ -42,8 +42,8 @@ impl<R: CodeRunner + Default> Networks<R> {
         Some(Self { networks, relays })
     }
 
-    pub fn parse_all_chip_file(&mut self){
-        for (_, network) in &mut self.networks{
+    pub fn parse_all_chip_file(&mut self) {
+        for (_, network) in &mut self.networks {
             network.parse_all_chip_file();
         }
     }
@@ -63,10 +63,10 @@ pub struct Network<R: CodeRunner + Default> {
     devices: Vec<Device<R>>,
 }
 
-impl<R: CodeRunner + Default> Network<R>{
-    pub fn parse_all_chip_file(&mut self){
-        for device in &mut self.devices{
-            if let Device::Rack(rack) = device{
+impl<R: CodeRunner + Default> Network<R> {
+    pub fn parse_all_chip_file(&mut self) {
+        for device in &mut self.devices {
+            if let Device::Rack(rack) = device {
                 rack.parse_all_chip_file()
             }
         }

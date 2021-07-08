@@ -14,11 +14,18 @@ pub struct Rack<R: CodeRunner + Default> {
     module: RackModule<R>,
 }
 
-impl<R: CodeRunner + Default> Rack<R>{
-    pub fn parse_all_chip_file(&mut self){
+impl<R: CodeRunner + Default> Rack<R> {
+    pub fn parse_all_chip_file(&mut self) {
         match &mut self.module {
-            RackModule::Core(a, b, c) => {a.load();b.load();c.load()},
-            RackModule::Socket(a, b) => {a.load();b.load()},
+            RackModule::Core(a, b, c) => {
+                a.load();
+                b.load();
+                c.load()
+            }
+            RackModule::Socket(a, b) => {
+                a.load();
+                b.load()
+            }
             RackModule::Reader(a) => a.load(),
         }
     }

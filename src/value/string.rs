@@ -81,13 +81,13 @@ impl ValueTrait for YololString {
     }
 }
 
-impl PartialEq for YololString{
+impl PartialEq for YololString {
     fn eq(&self, other: &Self) -> bool {
         self.0.eq(&other.0)
     }
 }
 
-impl PartialOrd for YololString{
+impl PartialOrd for YololString {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         self.0.partial_cmp(&other.0)
     }

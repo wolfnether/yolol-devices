@@ -198,25 +198,25 @@ impl Sub for YololValue {
     }
 }
 
-impl PartialEq for YololValue{
+impl PartialEq for YololValue {
     fn eq(&self, rhs: &Self) -> bool {
-        if self.is_string() && rhs.is_string(){
+        if self.is_string() && rhs.is_string() {
             let a: YololString = self.clone().try_into().unwrap();
             let b: YololString = rhs.clone().try_into().unwrap();
             return a.eq(&b);
         } else if !self.is_string() && !rhs.is_string() {
             let a: YololInt = self.clone().try_into().unwrap();
             let b: YololInt = rhs.clone().try_into().unwrap();
-            return a.eq(&b)
+            return a.eq(&b);
         }
         return false;
     }
 }
 
-impl PartialOrd for YololValue{
+impl PartialOrd for YololValue {
     fn partial_cmp(&self, rhs: &Self) -> Option<std::cmp::Ordering> {
-        if self.is_string() || rhs.is_string(){
-                        let a: YololString = {
+        if self.is_string() || rhs.is_string() {
+            let a: YololString = {
                 if self.is_string() {
                     self.clone().try_into().unwrap()
                 } else {
