@@ -29,6 +29,21 @@ impl<R: CodeRunner + Default> Rack<R> {
             RackModule::Reader(a) => a.load(),
         }
     }
+
+    pub fn step(&mut self) {
+        match &mut self.module {
+            RackModule::Core(a, b, c) => {
+                a.step();
+                b.step();
+                c.step()
+            }
+            RackModule::Socket(a, b) => {
+                a.step();
+                b.step()
+            }
+            RackModule::Reader(a) => a.step(),
+        }
+    }
 }
 
 #[derive(Debug)]

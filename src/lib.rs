@@ -47,6 +47,12 @@ impl<R: CodeRunner + Default> Networks<R> {
             network.parse_all_chip_file();
         }
     }
+
+    pub fn step(&mut self) {
+        for (_, network) in &mut self.networks {
+            network.step();
+        }
+    }
 }
 
 fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
@@ -68,6 +74,14 @@ impl<R: CodeRunner + Default> Network<R> {
         for device in &mut self.devices {
             if let Device::Rack(rack) = device {
                 rack.parse_all_chip_file()
+            }
+        }
+    }
+
+    pub fn step(&mut self) {
+        for device in &mut self.devices {
+            if let Device::Rack(rack) = device {
+                rack.step()
             }
         }
     }
