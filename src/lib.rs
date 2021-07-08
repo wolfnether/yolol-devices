@@ -1,7 +1,9 @@
 use std::collections::BTreeMap;
+use std::ops::Deref;
 
 use devices::chip::CodeRunner;
 use devices::Device;
+use field::Field;
 use yaml_rust::yaml::Hash;
 use yaml_rust::Yaml;
 
@@ -50,7 +52,28 @@ impl<R: CodeRunner + Default> Networks<R> {
 
     pub fn step(&mut self) {
         for (_, network) in &mut self.networks {
+            network.update_globals();
+        }
+        for (_, network) in &mut self.networks {
             network.step();
+        }
+        for (_, network) in &mut self.networks {
+            network.update();
+        }
+        for (src, dst) in &self.relays {
+            if let Some((_, src)) = self.networks.iter().find(|(s, _)| s == &src) {
+                let src = src.globals().clone();
+                if let Some((_, dst)) = self.networks.iter_mut().find(|(s, _)| s == &dst) {
+                    dst.set_globals(src);
+                }
+            }
+        }
+    }
+
+    pub fn print_globals(&self) {
+        for (name, network) in &self.networks {
+            println!("Globals of network : {}", name);
+            network.print_globals();
         }
     }
 }
@@ -67,6 +90,7 @@ fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
 #[derive(Debug)]
 pub struct Network<R: CodeRunner + Default> {
     devices: Vec<Device<R>>,
+    globals: Vec<Field>,
 }
 
 impl<R: CodeRunner + Default> Network<R> {
@@ -81,7 +105,49 @@ impl<R: CodeRunner + Default> Network<R> {
     pub fn step(&mut self) {
         for device in &mut self.devices {
             if let Device::Rack(rack) = device {
-                rack.step()
+                rack.step();
+            }
+        }
+    }
+
+    pub fn update_globals(&mut self) {
+        for device in &mut self.devices {
+            if let Device::Rack(rack) = device {
+                rack.update_globals(self.globals.clone());
+            }
+        }
+    }
+
+    pub fn update(&mut self) {
+        let mut field = vec![];
+        for device in &mut self.devices {
+            if let Device::Rack(rack) = device {
+                field.append(&mut rack.get_global());
+            }
+        }
+        self.set_globals(field);
+    }
+
+    pub fn print_globals(&self) {
+        for field in &self.globals {
+            println!(":{} = {}", field.name(), **field)
+        }
+    }
+
+    /// Get a reference to the network's globals.
+    pub fn globals(&self) -> Vec<Field> {
+        self.globals.clone()
+    }
+
+    /// Set the network's globals.
+    pub fn set_globals(&mut self, globals: Vec<Field>) {
+        for field in globals {
+            let global = self
+                .globals
+                .iter_mut()
+                .find(|i| i.name().to_lowercase() == field.name().to_lowercase());
+            if let Some(global) = global {
+                **global = field.deref().clone();
             }
         }
     }
@@ -98,6 +164,9 @@ impl<R: CodeRunner + Default> Network<R> {
                 }
             }
         }
-        Self { devices }
+        Self {
+            devices,
+            globals: vec![],
+        }
     }
 }

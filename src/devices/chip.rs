@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use yaml_rust::Yaml;
 
 use crate::deserialize_field_name;
@@ -37,12 +39,29 @@ impl<R: CodeRunner + Default> Chip<R> {
 
     pub fn step(&mut self) {
         if let Self::Yolol(chip) = self {
-            if chip.chip_wait.clone().into() {
+            if chip.chip_wait.deref().clone().into() {
                 if let Some(runner) = &mut chip.runner {
                     runner.step()
                 }
             }
         }
+    }
+
+    pub fn update_globals(&mut self, globals: Vec<Field>) {
+        if let Self::Yolol(chip) = self {
+            if let Some(runner) = &mut chip.runner {
+                runner.update_globals(globals)
+            }
+        }
+    }
+
+    pub fn get_global(&self) -> Vec<Field> {
+        if let Self::Yolol(chip) = self {
+            if let Some(runner) = &chip.runner {
+                return runner.get_global();
+            }
+        }
+        vec![]
     }
 }
 
@@ -65,6 +84,8 @@ impl<R: CodeRunner + Default> Default for Chip<R> {
 pub trait CodeRunner: Default {
     fn parse(&mut self, path: &str) -> Option<()>;
     fn step(&mut self);
+    fn update_globals(&mut self, globals: Vec<Field>);
+    fn get_global(&self) -> Vec<Field>;
 }
 
 #[derive(Default)]
@@ -74,4 +95,10 @@ impl CodeRunner for NoneRunner {
         None
     }
     fn step(&mut self) {}
+
+    fn update_globals(&mut self, _: Vec<Field>) {}
+
+    fn get_global(&self) -> Vec<Field> {
+        vec![]
+    }
 }

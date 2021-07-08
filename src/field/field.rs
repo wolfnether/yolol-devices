@@ -3,7 +3,7 @@ use std::ops::DerefMut;
 
 use crate::value::YololValue;
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Field {
     name: String,
     value: YololValue,

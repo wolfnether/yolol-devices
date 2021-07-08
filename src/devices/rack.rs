@@ -44,6 +44,38 @@ impl<R: CodeRunner + Default> Rack<R> {
             RackModule::Reader(a) => a.step(),
         }
     }
+
+    pub fn update_globals(&mut self, globals: Vec<Field>) {
+        match &mut self.module {
+            RackModule::Core(a, b, c) => {
+                a.update_globals(globals.clone());
+                b.update_globals(globals.clone());
+                c.update_globals(globals)
+            }
+            RackModule::Socket(a, b) => {
+                a.update_globals(globals.clone());
+                b.update_globals(globals)
+            }
+            RackModule::Reader(a) => a.update_globals(globals),
+        }
+    }
+
+    pub fn get_global(&self) -> Vec<Field> {
+        match &self.module {
+            RackModule::Core(a, b, c) => {
+                let mut a = a.get_global();
+                a.append(&mut b.get_global());
+                a.append(&mut c.get_global());
+                a
+            }
+            RackModule::Socket(a, b) => {
+                let mut a = a.get_global();
+                a.append(&mut b.get_global());
+                a
+            }
+            RackModule::Reader(a) => a.get_global(),
+        }
+    }
 }
 
 #[derive(Debug)]
