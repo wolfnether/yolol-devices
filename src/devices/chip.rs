@@ -23,6 +23,24 @@ impl<R: CodeRunner + Default> Chip<R> {
             _ => Self::None,
         }
     }
+
+    pub fn load(&mut self){
+        if let Self::Yolol(chip) = self{
+            if let Some(path) = chip.path.clone(){
+                chip.runner = R::default().parse(&path);
+            }
+        }
+    }
+
+    pub fn step(&mut self){
+        if let Self::Yolol(chip) = self{
+            if chip.chip_wait.clone().into() {
+                if let Some(runner) = &mut chip.runner{
+                    runner.step()
+                }
+            }
+        }
+    }
 }
 
 #[derive(Debug, Default)]
@@ -32,7 +50,7 @@ pub struct MemoryChip {}
 pub struct YololChip<R: CodeRunner + Default> {
     chip_wait: Field,
     path: Option<String>,
-    code: Option<R>,
+    runner: Option<R>,
 }
 
 impl<R: CodeRunner + Default> Default for Chip<R> {
@@ -42,13 +60,13 @@ impl<R: CodeRunner + Default> Default for Chip<R> {
 }
 
 pub trait CodeRunner: Default {
-    fn parse(&mut self, path: &str);
+    fn parse(&mut self, path: &str) -> Option<Self>;
     fn step(&mut self);
 }
 
 #[derive(Default)]
 pub struct NoneRunner;
 impl CodeRunner for NoneRunner {
-    fn parse(&mut self, _: &str) {}
+    fn parse(&mut self, _: &str) -> Option<Self> {None}
     fn step(&mut self) {}
 }
