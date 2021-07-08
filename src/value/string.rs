@@ -1,16 +1,14 @@
 use std::fmt::Display;
 use std::ops::Add;
-use std::ops::AddAssign;
 use std::ops::Deref;
 use std::ops::DerefMut;
 use std::ops::Sub;
-use std::ops::SubAssign;
 
 use super::ValueTrait;
 use super::YololInt;
 use super::YololValue;
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Default)]
+#[derive(Debug, Clone, Default)]
 pub struct YololString(String);
 
 impl ValueTrait for YololString {
@@ -19,33 +17,85 @@ impl ValueTrait for YololString {
         *self = self.clone() + " ".into();
         org.into()
     }
-
     fn pre_inc(&mut self) -> YololValue {
         *self = self.clone() + " ".into();
         self.clone().into()
     }
 
-    fn post_dec(&mut self) -> YololValue {
+    fn post_dec(&mut self) -> Option<YololValue> {
         if self.0.len() == 0 {
-            return self.clone().into();
+            return None;
         }
         let org = self.clone();
         *self = self.0[0..self.0.len() - 1].into();
-        org.into()
+        Some(org.into())
     }
 
-    fn pre_dec(&mut self) -> YololValue {
+    fn pre_dec(&mut self) -> Option<YololValue> {
         if self.0.len() == 0 {
-            return self.clone().into();
+            return None;
         }
         *self = self.0[0..self.0.len() - 1].into();
-        self.clone().into()
+        Some(self.clone().into())
+    }
+
+    fn fac(&self) -> Option<YololValue> {
+        //runtime error
+        None
+    }
+
+    fn abs(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn sqrt(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn sin(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn asin(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn cos(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn acos(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn tan(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn atan(&self) -> Option<YololValue> {
+        None
+    }
+
+    fn pow(&self, _: YololValue) -> Option<YololValue> {
+        None
+    }
+}
+
+impl PartialEq for YololString{
+    fn eq(&self, other: &Self) -> bool {
+        self.0.eq(&other.0)
+    }
+}
+
+impl PartialOrd for YololString{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.0.partial_cmp(&other.0)
     }
 }
 
 impl Into<bool> for YololString {
     fn into(self) -> bool {
-        !self.0.is_empty()
+        false
     }
 }
 
@@ -71,7 +121,8 @@ impl From<&str> for YololString {
 
 impl From<YololInt> for YololString {
     fn from(int: YololInt) -> Self {
-        YololString(format!("{}", *int as f64 / 1000.))
+        let f: f64 = int.into();
+        YololString(format!("{}", f))
     }
 }
 
@@ -84,35 +135,27 @@ impl Add for YololString {
 }
 
 impl Sub for YololString {
-    type Output = YololString;
+    type Output = Option<YololString>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         if rhs.0.len() > self.0.len() {
-            return self.clone();
+            return None;
         } else if rhs.0 == self.0 {
-            return Self("".into());
+            return Some(Self("".into()));
         } else {
             for i in 0..(self.0.len() - rhs.0.len()) {
                 let s = self.0.len() - i - rhs.0.len();
                 let e = self.0.len() - i;
                 if rhs.0 == self.0[s..e] {
-                    return Self(format!("{}{}", &self.0[0..s], &self.0[e..self.0.len()]));
+                    return Some(Self(format!(
+                        "{}{}",
+                        &self.0[0..s],
+                        &self.0[e..self.0.len()]
+                    )));
                 }
             }
         }
-        return self.clone();
-    }
-}
-
-impl AddAssign for YololString {
-    fn add_assign(&mut self, rhs: YololString) {
-        *self = self.clone() + rhs;
-    }
-}
-
-impl SubAssign for YololString {
-    fn sub_assign(&mut self, rhs: YololString) {
-        *self = self.clone() - rhs
+        return Some(self.clone());
     }
 }
 

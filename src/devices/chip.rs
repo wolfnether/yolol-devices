@@ -2,8 +2,6 @@ use yaml_rust::Yaml;
 
 use crate::deserialize_field_name;
 use crate::field::Field;
-use crate::Network;
-use crate::Networks;
 
 #[derive(Debug)]
 pub enum Chip<R: CodeRunner + Default> {

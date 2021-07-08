@@ -4,6 +4,9 @@ mod string;
 use std::convert::TryInto;
 use std::fmt::Display;
 use std::ops::Add;
+use std::ops::Div;
+use std::ops::Mul;
+use std::ops::Rem;
 use std::ops::Sub;
 
 use enum_dispatch::enum_dispatch;
@@ -12,15 +15,25 @@ pub use self::int::YololInt;
 pub use self::string::YololString;
 
 #[enum_dispatch]
-trait ValueTrait: Into<bool> {
+pub trait ValueTrait: Into<bool> {
     fn post_inc(&mut self) -> YololValue;
     fn pre_inc(&mut self) -> YololValue;
-    fn post_dec(&mut self) -> YololValue;
-    fn pre_dec(&mut self) -> YololValue;
+    fn post_dec(&mut self) -> Option<YololValue>;
+    fn pre_dec(&mut self) -> Option<YololValue>;
+    fn fac(&self) -> Option<YololValue>;
+    fn abs(&self) -> Option<YololValue>;
+    fn sqrt(&self) -> Option<YololValue>;
+    fn sin(&self) -> Option<YololValue>;
+    fn asin(&self) -> Option<YololValue>;
+    fn cos(&self) -> Option<YololValue>;
+    fn acos(&self) -> Option<YololValue>;
+    fn tan(&self) -> Option<YololValue>;
+    fn atan(&self) -> Option<YololValue>;
+    fn pow(&self, e: YololValue) -> Option<YololValue>;
 }
 
 #[enum_dispatch(ValueTrait)]
-#[derive(Debug, Clone, PartialEq, PartialOrd)]
+#[derive(Debug, Clone)]
 pub enum YololValue {
     String(YololString),
     Int(YololInt),
@@ -62,14 +75,14 @@ impl From<i64> for YololValue {
     }
 }
 
-impl From<f32> for YololValue {
-    fn from(v: f32) -> Self {
+impl From<f64> for YololValue {
+    fn from(v: f64) -> Self {
         Self::Int(v.into())
     }
 }
 
-impl From<f64> for YololValue {
-    fn from(v: f64) -> Self {
+impl From<bool> for YololValue {
+    fn from(v: bool) -> Self {
         Self::Int(v.into())
     }
 }
@@ -81,6 +94,47 @@ impl YololValue {
 
     pub fn and(&self, rhs: Self) -> Self {
         YololInt::from(self.clone().into() && rhs.into()).into()
+    }
+}
+
+impl Mul for YololValue {
+    type Output = Option<YololValue>;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        if let YololValue::Int(lhs) = self {
+            if let YololValue::Int(rhs) = rhs {
+                return Some((lhs * rhs).into());
+            }
+        }
+        None
+    }
+}
+
+impl Div for YololValue {
+    type Output = Option<YololValue>;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        if let YololValue::Int(lhs) = self {
+            if let YololValue::Int(rhs) = rhs {
+                return Some((lhs / rhs)?.into());
+            }
+        }
+        None
+    }
+}
+
+impl Rem for YololValue {
+    type Output = Option<YololValue>;
+
+    fn rem(self, rhs: Self) -> Self::Output {
+        if let YololValue::Int(lhs) = self {
+            if let YololValue::Int(rhs) = rhs {
+                if rhs != 0.into() {
+                    return Some((lhs * rhs).into());
+                }
+            }
+        }
+        None
     }
 }
 
@@ -115,7 +169,7 @@ impl Add for YololValue {
 }
 
 impl Sub for YololValue {
-    type Output = YololValue;
+    type Output = Option<YololValue>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         if self.is_string() || rhs.is_string() {
@@ -135,11 +189,54 @@ impl Sub for YololValue {
                     b.into()
                 }
             };
-            (a - b).into()
+            Some((a - b)?.into())
         } else {
             let a: YololInt = self.try_into().unwrap();
             let b: YololInt = rhs.try_into().unwrap();
-            (a - b).into()
+            Some((a - b).into())
+        }
+    }
+}
+
+impl PartialEq for YololValue{
+    fn eq(&self, rhs: &Self) -> bool {
+        if self.is_string() && rhs.is_string(){
+            let a: YololString = self.clone().try_into().unwrap();
+            let b: YololString = rhs.clone().try_into().unwrap();
+            return a.eq(&b);
+        } else if !self.is_string() && !rhs.is_string() {
+            let a: YololInt = self.clone().try_into().unwrap();
+            let b: YololInt = rhs.clone().try_into().unwrap();
+            return a.eq(&b)
+        }
+        return false;
+    }
+}
+
+impl PartialOrd for YololValue{
+    fn partial_cmp(&self, rhs: &Self) -> Option<std::cmp::Ordering> {
+        if self.is_string() || rhs.is_string(){
+                        let a: YololString = {
+                if self.is_string() {
+                    self.clone().try_into().unwrap()
+                } else {
+                    let a: YololInt = self.clone().try_into().unwrap();
+                    a.into()
+                }
+            };
+            let b: YololString = {
+                if rhs.is_string() {
+                    rhs.clone().try_into().unwrap()
+                } else {
+                    let b: YololInt = rhs.clone().try_into().unwrap();
+                    b.into()
+                }
+            };
+            return a.partial_cmp(&b);
+        } else {
+            let a: YololInt = self.clone().try_into().unwrap();
+            let b: YololInt = rhs.clone().try_into().unwrap();
+            a.partial_cmp(&b)
         }
     }
 }
