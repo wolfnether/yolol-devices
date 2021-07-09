@@ -163,7 +163,7 @@ impl Rem for YololValue {
     }
 }
 
-impl Add for YololValue {
+impl Add for &YololValue {
     type Output = YololValue;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -193,7 +193,7 @@ impl Add for YololValue {
     }
 }
 
-impl Sub for YololValue {
+impl Sub for &YololValue {
     type Output = Option<YololValue>;
 
     fn sub(self, rhs: Self) -> Self::Output {
