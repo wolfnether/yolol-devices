@@ -127,7 +127,7 @@ impl ValueTrait for YololInt {
         Some(f.atan().to_degrees().into())
     }
 
-    fn pow(&self, e: YololValue) -> Option<YololValue> {
+    fn pow(&self, e: &YololValue) -> Option<YololValue> {
         match e {
             YololValue::String(_) => None,
             YololValue::Int(v) => {

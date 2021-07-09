@@ -76,7 +76,7 @@ impl ValueTrait for YololString {
         None
     }
 
-    fn pow(&self, _: YololValue) -> Option<YololValue> {
+    fn pow(&self, _: &YololValue) -> Option<YololValue> {
         None
     }
 }

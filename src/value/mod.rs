@@ -30,7 +30,7 @@ pub trait ValueTrait {
     fn acos(&self) -> Option<YololValue>;
     fn tan(&self) -> Option<YololValue>;
     fn atan(&self) -> Option<YololValue>;
-    fn pow(&self, e: YololValue) -> Option<YololValue>;
+    fn pow(&self, e: &YololValue) -> Option<YololValue>;
 }
 
 #[enum_dispatch(ValueTrait)]
