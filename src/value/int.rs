@@ -113,9 +113,9 @@ impl ValueTrait for YololInt {
     }
 
     fn tan(&self) -> Option<YololValue> {
-        let sin = self.sin()?;
-        let cos = self.cos()?;
-        if cos == 0.into() {
+        let sin = &self.sin()?;
+        let cos = &self.cos()?;
+        if cos == &0.into() {
             Some(Self(-22877332428).into())
         } else {
             sin / cos
@@ -155,34 +155,36 @@ impl Sub for &YololInt {
     }
 }
 
-impl Mul for YololInt {
+impl Mul for &YololInt {
     type Output = YololInt;
 
     #[allow(clippy::suspicious_arithmetic_impl)]
     fn mul(self, rhs: Self) -> Self::Output {
         let mut r = self.0;
         r = r.wrapping_mul(rhs.0);
-        Self((r / 1000) as i64)
+        YololInt((r / 1000) as i64)
     }
 }
 
-impl Div for YololInt {
+impl Div for &YololInt {
     type Output = Option<YololInt>;
     fn div(self, rhs: Self) -> Self::Output {
-        if rhs == 0.into() {
+        if rhs == &0.into() {
             return None;
         }
-        Some(Self::from((self.0 as f64 / 1000.) / (rhs.0 as f64 / 1000.)))
+        Some(YololInt::from(
+            (self.0 as f64 / 1000.) / (rhs.0 as f64 / 1000.),
+        ))
     }
 }
 
-impl Rem for YololInt {
+impl Rem for &YololInt {
     type Output = Option<YololInt>;
     fn rem(self, rhs: Self) -> Self::Output {
-        if rhs == 0.into() {
+        if rhs == &0.into() {
             return None;
         }
-        Some(Self(self.0 % rhs.0))
+        Some(YololInt(self.0 % rhs.0))
     }
 }
 

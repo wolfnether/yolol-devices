@@ -122,7 +122,7 @@ impl YololValue {
     }
 }
 
-impl Mul for YololValue {
+impl Mul for &YololValue {
     type Output = Option<YololValue>;
 
     fn mul(self, rhs: Self) -> Self::Output {
@@ -135,7 +135,7 @@ impl Mul for YololValue {
     }
 }
 
-impl Div for YololValue {
+impl Div for &YololValue {
     type Output = Option<YololValue>;
 
     fn div(self, rhs: Self) -> Self::Output {
@@ -148,14 +148,14 @@ impl Div for YololValue {
     }
 }
 
-impl Rem for YololValue {
+impl Rem for &YololValue {
     type Output = Option<YololValue>;
 
     fn rem(self, rhs: Self) -> Self::Output {
         if let YololValue::Int(lhs) = self {
             if let YololValue::Int(rhs) = rhs {
-                if rhs != 0.into() {
-                    return Some((lhs * rhs).into());
+                if rhs != &0.into() {
+                    return Some((lhs % rhs)?.into());
                 }
             }
         }
