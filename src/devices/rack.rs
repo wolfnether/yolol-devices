@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use super::chip::Chip;
 use super::chip::CodeRunner;
 use super::DeviceTrait;
@@ -91,10 +93,10 @@ impl<R: CodeRunner + Default> Default for RackModule<R> {
     }
 }
 
-impl<R: CodeRunner + Default> DeviceTrait<R> for Rack<R> {
+impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
     fn get_field(&self, field: &str) -> Option<&crate::value::YololValue> {
         if self.current_state.name() == field {
-            return Some(&self.current_state);
+            return Some(self.current_state.deref());
         }
         if self.on_state.name() == field {
             return Some(&self.on_state);
@@ -128,7 +130,7 @@ impl<R: CodeRunner + Default> DeviceTrait<R> for Rack<R> {
         "rack".to_string()
     }
 
-    fn deserialize(mut self, yaml: &yaml_rust::Yaml) -> super::Device<R> {
+    fn deserialize(&mut self, yaml: &yaml_rust::Yaml) {
         deserialize_field_name!(self, current_state, yaml);
         deserialize_field_name!(self, on_state, yaml);
         deserialize_field_name!(self, off_state, yaml);
@@ -176,7 +178,5 @@ impl<R: CodeRunner + Default> DeviceTrait<R> for Rack<R> {
                 _ => (),
             }
         }
-
-        self.into()
     }
 }

@@ -4,8 +4,6 @@ use concat_idents::concat_idents;
 use convert_case::Case;
 use convert_case::Casing;
 use enum_dispatch::enum_dispatch;
-use strum::EnumIter;
-use strum::IntoEnumIterator;
 use yaml_rust::Yaml;
 
 use self::chip::CodeRunner;
@@ -16,50 +14,84 @@ use crate::value::YololValue;
 //thx https://github.com/martindevans/YololShipSystemSpec
 
 #[enum_dispatch]
-pub trait DeviceTrait<R: CodeRunner + Default> {
+pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(self, yaml: &Yaml) -> Device<R>;
+    fn deserialize(&mut self, yaml: &Yaml);
 }
 
-#[enum_dispatch(DeviceTrait<R>)]
-#[derive(Debug, EnumIter)]
+#[allow(clippy::large_enum_variant)]
+#[enum_dispatch(DeviceTrait)]
+#[derive(Debug)]
 pub enum Device<R: CodeRunner + Default> {
-    Button,
-    CargoBeam,
-    CargoLockFrame,
-    ChipSocket,
-    FixedMount,
-    FlightControlUnit,
-    Generator,
-    Hinge,
-    InformationScreen,
-    Lamp,
-    Lever,
-    MainFlightComputer,
-    MiningLaser,
-    ModularDisplay,
+    Button(Button),
+    CargoBeam(CargoBeam),
+    CargoLockFrame(CargoLockFrame),
+    ChipSocket(ChipSocket),
+    FixedMount(FixedMount),
+    FlightControlUnit(FlightControlUnit),
+    Generator(Generator),
+    Hinge(Hinge),
+    InformationScreen(InformationScreen),
+    Lamp(Lamp),
+    Lever(Lever),
+    MainFlightComputer(MainFlightComputer),
+    MiningLaser(MiningLaser),
+    ModularDisplay(ModularDisplay),
     Rack(Rack<R>),
-    RadioReceiver,
-    RadioTransmitter,
-    RailRelay,
-    RailSensorStrip,
-    RailTrigger,
-    RangeFinder,
-    Relay,
-    Tank,
-    Thruster,
-    Turntable,
+    RadioReceiver(RadioReceiver),
+    RadioTransmitter(RadioTransmitter),
+    RailRelay(RailRelay),
+    RailSensorStrip(RailSensorStrip),
+    RailTrigger(RailTrigger),
+    RangeFinder(RangeFinder),
+    Relay(Relay),
+    Tank(Tank),
+    Thruster(Thruster),
+    Turntable(Turntable),
 }
 
 impl<R: CodeRunner + Default> Device<R> {
     pub fn deserialize(yaml: &Yaml) -> Option<Self> {
         let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
-        let device = Device::iter().find(|i| i.get_device_name() == device_type)?;
 
-        Some(device.deserialize(yaml))
+        let device: Option<Device<R>> = match device_type {
+            "button" => Some(Button::default().into()),
+            "cargo_beam" => Some(CargoBeam::default().into()),
+            "cargo_lock_frame" => Some(CargoLockFrame::default().into()),
+            "chip_socket" => Some(ChipSocket::default().into()),
+            "fixed_mount" => Some(FixedMount::default().into()),
+            "flight_control_unit" => Some(FlightControlUnit::default().into()),
+            "generator" => Some(Generator::default().into()),
+            "hinge" => Some(Hinge::default().into()),
+            "information_screen" => Some(InformationScreen::default().into()),
+            "lamp" => Some(Lamp::default().into()),
+            "lever" => Some(Lever::default().into()),
+            "main_flight_computer" => Some(MainFlightComputer::default().into()),
+            "mining_laser" => Some(MiningLaser::default().into()),
+            "modular_display" => Some(ModularDisplay::default().into()),
+            "rack" => Some(Rack::default().into()),
+            "radio_receiver" => Some(RadioReceiver::default().into()),
+            "radio_transmitter" => Some(RadioTransmitter::default().into()),
+            "rail_relay" => Some(RailRelay::default().into()),
+            "rail_sensor_strip" => Some(RailSensorStrip::default().into()),
+            "rail_trigger" => Some(RailTrigger::default().into()),
+            "range_finder" => Some(RangeFinder::default().into()),
+            "relay" => Some(RailRelay::default().into()),
+            "tank" => Some(Tank::default().into()),
+            "thruster" => Some(Thruster::default().into()),
+            "turntable" => Some(Turntable::default().into()),
+            _ => None,
+        };
+
+        if let Some(mut device) = device {
+            device.deserialize(yaml);
+            Some(device)
+        } else {
+            None
+        }
     }
 }
 
@@ -80,14 +112,14 @@ macro_rules! deserialize_field_name {
 
 macro_rules! make_device {
     ($name:ident $(, $field:ident)+ $(,)?) => {
-        #[derive(Debug,Default)]
+        #[derive(Debug, Default)]
         pub struct $name {
             $($field:Field,)+
         }
 
         impl $name{
             $(
-                pub fn $field(&self)->&Field{
+                pub fn $field(& self)->&Field{
                     &self.$field
                 }
                 concat_idents!(fn_name = $field,_mut{
@@ -98,11 +130,11 @@ macro_rules! make_device {
             )+
         }
 
-        impl<R:CodeRunner+ Default> DeviceTrait<R> for $name{
-            fn deserialize(mut self, yaml: &Yaml) -> Device<R> {
+        impl DeviceTrait for $name{
+            fn deserialize(&mut self, yaml: &Yaml) {
                 $(deserialize_field_name!(self, $field, yaml);)+
-                self.into()
             }
+
             fn get_device_name(&self) -> String {
                 stringify!($name).to_string().to_case(Case::Snake)
             }

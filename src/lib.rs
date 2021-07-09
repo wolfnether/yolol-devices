@@ -45,19 +45,19 @@ impl<R: CodeRunner + Default> Networks<R> {
     }
 
     pub fn parse_all_chip_file(&mut self) {
-        for (_, network) in &mut self.networks {
+        for network in self.networks.values_mut() {
             network.parse_all_chip_file();
         }
     }
 
     pub fn step(&mut self) {
-        for (_, network) in &mut self.networks {
+        for network in self.networks.values_mut() {
             network.update_globals();
         }
-        for (_, network) in &mut self.networks {
+        for network in self.networks.values_mut() {
             network.step();
         }
-        for (_, network) in &mut self.networks {
+        for network in self.networks.values_mut() {
             network.update();
         }
         for (src, dst) in &self.relays {

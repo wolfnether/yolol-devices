@@ -1,6 +1,7 @@
 mod int;
 mod string;
 
+use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::fmt::Display;
 use std::ops::Add;
@@ -15,7 +16,7 @@ pub use self::int::YololInt;
 pub use self::string::YololString;
 
 #[enum_dispatch]
-pub trait ValueTrait: Into<bool> {
+pub trait ValueTrait {
     fn post_inc(&mut self) -> YololValue;
     fn pre_inc(&mut self) -> YololValue;
     fn post_dec(&mut self) -> Option<YololValue>;
@@ -39,18 +40,9 @@ pub enum YololValue {
     Int(YololInt),
 }
 
-impl Into<bool> for YololValue {
-    fn into(self) -> bool {
-        match self {
-            YololValue::String(v) => v.into(),
-            YololValue::Int(v) => v.into(),
-        }
-    }
-}
-
 impl Default for YololValue {
     fn default() -> Self {
-        YololInt::default().into()
+        YololValue::Int(YololInt::default())
     }
 }
 
@@ -59,6 +51,15 @@ impl YololValue {
         match self {
             YololValue::String(_) => true,
             YololValue::Int(_) => false,
+        }
+    }
+}
+
+impl From<&YololValue> for bool {
+    fn from(v: &YololValue) -> Self {
+        match v {
+            YololValue::String(v) => v.into(),
+            YololValue::Int(v) => v.into(),
         }
     }
 }
@@ -87,13 +88,37 @@ impl From<bool> for YololValue {
     }
 }
 
+impl TryFrom<&YololValue> for YololInt {
+    type Error = ();
+
+    fn try_from(value: &YololValue) -> Result<Self, Self::Error> {
+        if let YololValue::Int(v) = value {
+            Ok(*v)
+        } else {
+            Err(())
+        }
+    }
+}
+
+impl TryFrom<&YololValue> for YololString {
+    type Error = ();
+
+    fn try_from(value: &YololValue) -> Result<Self, Self::Error> {
+        if let YololValue::String(v) = value {
+            Ok(v.clone())
+        } else {
+            Err(())
+        }
+    }
+}
+
 impl YololValue {
-    pub fn or(&self, rhs: Self) -> Self {
-        YololInt::from(self.clone().into() || rhs.into()).into()
+    pub fn or(&self, rhs: &Self) -> Self {
+        YololInt::from(self.into() || rhs.into()).into()
     }
 
-    pub fn and(&self, rhs: Self) -> Self {
-        YololInt::from(self.clone().into() && rhs.into()).into()
+    pub fn and(&self, rhs: &Self) -> Self {
+        YololInt::from(self.into() && rhs.into()).into()
     }
 }
 
@@ -147,7 +172,7 @@ impl Add for YololValue {
                 if self.is_string() {
                     self.try_into().unwrap()
                 } else {
-                    let a: YololInt = self.try_into().unwrap();
+                    let a: &YololInt = &self.try_into().unwrap();
                     a.into()
                 }
             };
@@ -155,7 +180,7 @@ impl Add for YololValue {
                 if rhs.is_string() {
                     rhs.try_into().unwrap()
                 } else {
-                    let b: YololInt = rhs.try_into().unwrap();
+                    let b: &YololInt = &rhs.try_into().unwrap();
                     b.into()
                 }
             };
@@ -163,7 +188,7 @@ impl Add for YololValue {
         } else {
             let a: YololInt = self.try_into().unwrap();
             let b: YololInt = rhs.try_into().unwrap();
-            (a + b).into()
+            (&a + &b).into()
         }
     }
 }
@@ -177,7 +202,7 @@ impl Sub for YololValue {
                 if self.is_string() {
                     self.try_into().unwrap()
                 } else {
-                    let a: YololInt = self.try_into().unwrap();
+                    let a: &YololInt = &self.try_into().unwrap();
                     a.into()
                 }
             };
@@ -185,7 +210,7 @@ impl Sub for YololValue {
                 if rhs.is_string() {
                     rhs.try_into().unwrap()
                 } else {
-                    let b: YololInt = rhs.try_into().unwrap();
+                    let b: &YololInt = &rhs.try_into().unwrap();
                     b.into()
                 }
             };
@@ -193,7 +218,7 @@ impl Sub for YololValue {
         } else {
             let a: YololInt = self.try_into().unwrap();
             let b: YololInt = rhs.try_into().unwrap();
-            Some((a - b).into())
+            Some((&a - &b).into())
         }
     }
 }
@@ -209,7 +234,7 @@ impl PartialEq for YololValue {
             let b: YololInt = rhs.clone().try_into().unwrap();
             return a.eq(&b);
         }
-        return false;
+        false
     }
 }
 
@@ -220,19 +245,19 @@ impl PartialOrd for YololValue {
                 if self.is_string() {
                     self.clone().try_into().unwrap()
                 } else {
-                    let a: YololInt = self.clone().try_into().unwrap();
+                    let a: &YololInt = &self.try_into().unwrap();
                     a.into()
                 }
             };
             let b: YololString = {
                 if rhs.is_string() {
-                    rhs.clone().try_into().unwrap()
+                    rhs.try_into().unwrap()
                 } else {
-                    let b: YololInt = rhs.clone().try_into().unwrap();
+                    let b: &YololInt = &rhs.clone().try_into().unwrap();
                     b.into()
                 }
             };
-            return a.partial_cmp(&b);
+            a.partial_cmp(&b)
         } else {
             let a: YololInt = self.clone().try_into().unwrap();
             let b: YololInt = rhs.clone().try_into().unwrap();

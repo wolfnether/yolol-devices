@@ -33,23 +33,23 @@ impl PartialOrd for YololInt {
 
 impl ValueTrait for YololInt {
     fn post_inc(&mut self) -> YololValue {
-        *self = self.clone() + 1.into();
-        self.clone().into()
+        *self = &*self + &1.into();
+        (*self).into()
     }
     fn pre_inc(&mut self) -> YololValue {
-        let o = self.clone();
-        *self = self.clone() + 1.into();
+        let o = *self;
+        *self = &*self + &1.into();
         o.into()
     }
 
     fn post_dec(&mut self) -> Option<YololValue> {
-        *self = self.clone() - 1.into();
-        Some(self.clone().into())
+        *self = &*self - &1.into();
+        Some((*self).into())
     }
 
     fn pre_dec(&mut self) -> Option<YololValue> {
-        let o = self.clone();
-        *self = self.clone() - 1.into();
+        let o = *self;
+        *self = &*self - &1.into();
         Some(o.into())
     }
 
@@ -78,7 +78,7 @@ impl ValueTrait for YololInt {
 
     fn sqrt(&self) -> Option<YololValue> {
         let f = self.0;
-        if f < 0 || f >= 9223372036854775000 {
+        if !(0..9223372036854775000).contains(&f) {
             return Some(Self(-9223372036854775808).into());
         }
         let v = (f as f64).sqrt() / 31.6227766017;
@@ -93,7 +93,7 @@ impl ValueTrait for YololInt {
 
     fn asin(&self) -> Option<YololValue> {
         let f: f64 = self.into();
-        if f < -1. || 1. < f {
+        if !(-1. ..=1.).contains(&f) {
             return Some(Self(-9223372036854775808).into());
         }
         Some(f.asin().to_degrees().into())
@@ -106,7 +106,7 @@ impl ValueTrait for YololInt {
 
     fn acos(&self) -> Option<YololValue> {
         let f: f64 = self.into();
-        if f < -1. || 1. < f {
+        if !(-1. ..=1.).contains(&f) {
             return Some(Self(-9223372036854775808).into());
         }
         Some(f.acos().to_degrees().into())
@@ -141,40 +141,24 @@ impl ValueTrait for YololInt {
     }
 }
 
-impl From<i64> for YololInt {
-    fn from(v: i64) -> Self {
-        Self(v * 1000)
-    }
-}
-
-impl From<f64> for YololInt {
-    fn from(v: f64) -> Self {
-        Self((v * 1000.).round() as i64)
-    }
-}
-
-impl From<bool> for YololInt {
-    fn from(v: bool) -> Self {
-        Self(1000 * v as i64)
-    }
-}
-
-impl Add for YololInt {
+impl Add for &YololInt {
     type Output = YololInt;
     fn add(self, rhs: Self) -> Self::Output {
-        Self(self.0.saturating_add(rhs.0))
+        YololInt(self.0.saturating_add(rhs.0))
     }
 }
 
-impl Sub for YololInt {
+impl Sub for &YololInt {
     type Output = YololInt;
     fn sub(self, rhs: Self) -> Self::Output {
-        Self(self.0.saturating_sub(rhs.0))
+        YololInt(self.0.saturating_sub(rhs.0))
     }
 }
 
 impl Mul for YololInt {
     type Output = YololInt;
+
+    #[allow(clippy::suspicious_arithmetic_impl)]
     fn mul(self, rhs: Self) -> Self::Output {
         let mut r = self.0;
         r = r.wrapping_mul(rhs.0);
@@ -202,10 +186,10 @@ impl Rem for YololInt {
     }
 }
 
-impl Not for YololInt {
+impl Not for &YololInt {
     type Output = YololInt;
     fn not(self) -> Self::Output {
-        Self::from(self.0 == 0)
+        (self.0 == 0).into()
     }
 }
 
@@ -226,45 +210,45 @@ impl Display for YololInt {
     }
 }
 
-impl Into<bool> for YololInt {
-    fn into(self) -> bool {
-        self.0 != 0
+impl From<&YololInt> for bool {
+    fn from(v: &YololInt) -> Self {
+        v.0 != 0
     }
 }
 
-impl Into<i64> for YololInt {
-    fn into(self) -> i64 {
-        self.0 / 1000
+impl From<&YololInt> for i64 {
+    fn from(b: &YololInt) -> Self {
+        b.0 / 1000
     }
 }
 
-impl Into<usize> for YololInt {
-    fn into(self) -> usize {
-        self.0 as usize / 1000
+impl From<&YololInt> for usize {
+    fn from(b: &YololInt) -> Self {
+        b.0 as usize / 1000
     }
 }
 
-impl Into<f64> for YololInt {
-    fn into(self) -> f64 {
-        self.0 as f64 / 1000.
+impl From<&YololInt> for f64 {
+    fn from(v: &YololInt) -> Self {
+        v.0 as f64 / 1000.
     }
 }
 
-impl Into<i64> for &YololInt {
-    fn into(self) -> i64 {
-        self.0 / 1000
+impl From<bool> for YololInt {
+    fn from(v: bool) -> Self {
+        Self(v as i64 * 1000)
     }
 }
 
-impl Into<usize> for &YololInt {
-    fn into(self) -> usize {
-        self.0 as usize / 1000
+impl From<i64> for YololInt {
+    fn from(v: i64) -> Self {
+        Self(v * 1000)
     }
 }
 
-impl Into<f64> for &YololInt {
-    fn into(self) -> f64 {
-        self.0 as f64 / 1000.
+impl From<f64> for YololInt {
+    fn from(v: f64) -> Self {
+        Self((v * 1000.).round() as i64)
     }
 }
 
@@ -281,8 +265,8 @@ macro_rules! yolol_int_test {
     };
     ($n:ident, _, $op:tt,$b:expr) => {        #[test]
         fn $n(){
-            let a = $op YololInt::from($b);
-            let b =YololInt::from($op $b);
+            let a = $op &YololInt::from($b);
+            let b = YololInt::from($op $b);
             if a != b {
                 panic!("{} {} = {:?} != {:?}",stringify!($op),$b, a,b)
             }

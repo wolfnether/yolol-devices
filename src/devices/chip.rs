@@ -17,8 +17,10 @@ impl<R: CodeRunner + Default> Chip<R> {
         match chip_type {
             "memory_chip" => Self::Memory(MemoryChip::default()),
             "yolol_chip" => {
-                let mut chip = YololChip::default();
-                chip.path = yaml["script"].as_str().map(|s| s.to_string());
+                let mut chip = YololChip {
+                    path: yaml["script"].as_str().map(|s| s.to_string()),
+                    ..YololChip::default()
+                };
                 deserialize_field_name!(chip, chip_wait, yaml);
                 Self::Yolol(chip)
             }
@@ -41,7 +43,7 @@ impl<R: CodeRunner + Default> Chip<R> {
 
     pub fn step(&mut self) {
         if let Self::Yolol(chip) = self {
-            if chip.chip_wait.deref().clone().into() {
+            if chip.chip_wait.deref().into() {
                 if let Some(runner) = &mut chip.runner {
                     runner.step()
                 }
@@ -77,7 +79,7 @@ pub struct YololChip<R: CodeRunner + Default> {
     runner: Option<R>,
 }
 
-impl<R: CodeRunner + Default> Default for Chip<R> {
+impl<'a, R: CodeRunner + Default> Default for Chip<R> {
     fn default() -> Self {
         Self::None
     }

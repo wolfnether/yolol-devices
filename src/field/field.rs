@@ -3,7 +3,7 @@ use std::ops::DerefMut;
 
 use crate::value::YololValue;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Field {
     name: String,
     value: YololValue,
@@ -30,7 +30,7 @@ impl Deref for Field {
 }
 
 impl DerefMut for Field {
-    fn deref_mut(&mut self) -> &mut <Self as Deref>::Target {
+    fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.value
     }
 }

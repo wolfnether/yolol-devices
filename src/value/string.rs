@@ -23,7 +23,7 @@ impl ValueTrait for YololString {
     }
 
     fn post_dec(&mut self) -> Option<YololValue> {
-        if self.0.len() == 0 {
+        if self.0.is_empty() {
             return None;
         }
         let org = self.clone();
@@ -32,7 +32,7 @@ impl ValueTrait for YololString {
     }
 
     fn pre_dec(&mut self) -> Option<YololValue> {
-        if self.0.len() == 0 {
+        if self.0.is_empty() {
             return None;
         }
         *self = self.0[0..self.0.len() - 1].into();
@@ -93,8 +93,8 @@ impl PartialOrd for YololString {
     }
 }
 
-impl Into<bool> for YololString {
-    fn into(self) -> bool {
+impl From<&YololString> for bool {
+    fn from(_: &YololString) -> Self {
         false
     }
 }
@@ -119,8 +119,8 @@ impl From<&str> for YololString {
     }
 }
 
-impl From<YololInt> for YololString {
-    fn from(int: YololInt) -> Self {
+impl From<&YololInt> for YololString {
+    fn from(int: &YololInt) -> Self {
         let f: f64 = int.into();
         YololString(format!("{}", f))
     }
@@ -155,7 +155,7 @@ impl Sub for YololString {
                 }
             }
         }
-        return Some(self.clone());
+        Some(self)
     }
 }
 
@@ -181,7 +181,7 @@ fn remove_test_1() {
     let b = " world";
     assert_eq!(
         YololString::from("Hello"),
-        YololString::from(a) - YololString::from(b)
+        (YololString::from(a) - YololString::from(b)).unwrap()
     )
 }
 
@@ -191,7 +191,7 @@ fn remove_test_2() {
     let b = " world";
     assert_eq!(
         YololString::from("Hello"),
-        YololString::from(a) - YololString::from(b)
+        (YololString::from(a) - YololString::from(b)).unwrap()
     )
 }
 
@@ -201,7 +201,7 @@ fn remove_test_3() {
     let a = " world";
     assert_eq!(
         YololString::from(" world"),
-        YololString::from(a) - YololString::from(b)
+        (YololString::from(a) - YololString::from(b)).unwrap()
     )
 }
 
@@ -211,6 +211,6 @@ fn remove_test_4() {
     let b = " world";
     assert_eq!(
         YololString::from("Hello world Hello"),
-        YololString::from(a) - YololString::from(b)
+        (YololString::from(a) - YololString::from(b)).unwrap()
     )
 }
