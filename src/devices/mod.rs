@@ -4,11 +4,11 @@ use concat_idents::concat_idents;
 use convert_case::Case;
 use convert_case::Casing;
 use enum_dispatch::enum_dispatch;
-use yaml_rust::Yaml;
 
 use self::chip::CodeRunner;
 pub use self::rack::Rack;
 use crate::field::Field;
+use crate::parser::YamlElement;
 use crate::value::YololValue;
 
 //thx https://github.com/martindevans/YololShipSystemSpec
@@ -18,7 +18,7 @@ pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(&mut self, yaml: &Yaml);
+    fn deserialize(&mut self, yaml: &YamlElement);
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -53,36 +53,36 @@ pub enum Device<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Device<R> {
-    pub fn deserialize(yaml: &Yaml) -> Option<Self> {
+    pub fn deserialize(yaml: &YamlElement) -> Option<Self> {
         let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
 
-        let device: Option<Device<R>> = match device_type {
-            "button" => Some(Button::default().into()),
-            "cargo_beam" => Some(CargoBeam::default().into()),
-            "cargo_lock_frame" => Some(CargoLockFrame::default().into()),
-            "chip_socket" => Some(ChipSocket::default().into()),
-            "fixed_mount" => Some(FixedMount::default().into()),
-            "flight_control_unit" => Some(FlightControlUnit::default().into()),
-            "generator" => Some(Generator::default().into()),
-            "hinge" => Some(Hinge::default().into()),
-            "information_screen" => Some(InformationScreen::default().into()),
-            "lamp" => Some(Lamp::default().into()),
-            "lever" => Some(Lever::default().into()),
-            "main_flight_computer" => Some(MainFlightComputer::default().into()),
-            "mining_laser" => Some(MiningLaser::default().into()),
-            "modular_display" => Some(ModularDisplay::default().into()),
-            "rack" => Some(Rack::default().into()),
-            "radio_receiver" => Some(RadioReceiver::default().into()),
-            "radio_transmitter" => Some(RadioTransmitter::default().into()),
-            "rail_relay" => Some(RailRelay::default().into()),
-            "rail_sensor_strip" => Some(RailSensorStrip::default().into()),
-            "rail_trigger" => Some(RailTrigger::default().into()),
-            "range_finder" => Some(RangeFinder::default().into()),
-            "relay" => Some(RailRelay::default().into()),
-            "tank" => Some(Tank::default().into()),
-            "thruster" => Some(Thruster::default().into()),
-            "turntable" => Some(Turntable::default().into()),
+        let device: Option<Device<R>> = match device_type.as_str() {
+            "!button" => Some(Button::default().into()),
+            "!cargo_beam" => Some(CargoBeam::default().into()),
+            "!cargo_lock_frame" => Some(CargoLockFrame::default().into()),
+            "!chip_socket" => Some(ChipSocket::default().into()),
+            "!fixed_mount" => Some(FixedMount::default().into()),
+            "!flight_control_unit" => Some(FlightControlUnit::default().into()),
+            "!generator" => Some(Generator::default().into()),
+            "!hinge" => Some(Hinge::default().into()),
+            "!information_screen" => Some(InformationScreen::default().into()),
+            "!lamp" => Some(Lamp::default().into()),
+            "!lever" => Some(Lever::default().into()),
+            "!main_flight_computer" => Some(MainFlightComputer::default().into()),
+            "!mining_laser" => Some(MiningLaser::default().into()),
+            "!modular_display" => Some(ModularDisplay::default().into()),
+            "!rack" => Some(Rack::default().into()),
+            "!radio_receiver" => Some(RadioReceiver::default().into()),
+            "!radio_transmitter" => Some(RadioTransmitter::default().into()),
+            "!rail_relay" => Some(RailRelay::default().into()),
+            "!rail_sensor_strip" => Some(RailSensorStrip::default().into()),
+            "!rail_trigger" => Some(RailTrigger::default().into()),
+            "!range_finder" => Some(RangeFinder::default().into()),
+            "!relay" => Some(RailRelay::default().into()),
+            "!tank" => Some(Tank::default().into()),
+            "!thruster" => Some(Thruster::default().into()),
+            "!turntable" => Some(Turntable::default().into()),
             _ => None,
         };
 
@@ -131,7 +131,7 @@ macro_rules! make_device {
         }
 
         impl DeviceTrait for $name{
-            fn deserialize(&mut self, yaml: &Yaml) {
+            fn deserialize(&mut self,yaml: &YamlElement) {
                 $(deserialize_field_name!(self, $field, yaml);)+
             }
 
