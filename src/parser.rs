@@ -171,9 +171,9 @@ impl YamlDocument {
                 }
                 Event::SequenceEnd => {
                     if let Event::SequenceStart { anchor, tag, .. } = el {
-                        let root = Box::new(YamlElement::Set(root, tag.clone()));
+                        let root = Box::new(YamlElement::Set(root, tag));
                         if let Some(anchor) = anchor {
-                            self.anchor.insert(anchor.clone(), root.clone());
+                            self.anchor.insert(anchor, root.clone());
                         }
                         return Some(root);
                     }
@@ -225,9 +225,9 @@ impl YamlDocument {
                 }
                 Event::MappingEnd => {
                     if let Event::MappingStart { anchor, tag, .. } = el {
-                        let map = Box::new(YamlElement::Map(map, tag.clone()));
+                        let map = Box::new(YamlElement::Map(map, tag));
                         if let Some(anchor) = anchor {
-                            self.anchor.insert(anchor.clone(), map.clone());
+                            self.anchor.insert(anchor, map.clone());
                         }
                         return Some(map);
                     }
@@ -244,11 +244,9 @@ impl Index<&str> for YamlElement {
     type Output = YamlElement;
 
     fn index(&self, index: &str) -> &Self::Output {
-        let map = self.as_map();
-        if map.is_none() || !map.unwrap().contains_key(index) {
-            &Self::None
-        } else {
-            map.unwrap()[index].as_ref()
+        match self.as_map() {
+            Some(map) if map.contains_key(index) => map[index].as_ref(),
+            _ => &Self::None,
         }
     }
 }

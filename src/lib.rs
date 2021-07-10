@@ -1,12 +1,10 @@
 use std::collections::BTreeMap;
-use std::iter::Map;
 use std::ops::Deref;
 
 use devices::chip::CodeRunner;
 use devices::Device;
 use field::Field;
 use parser::YamlElement;
-use parser::YamlMap;
 
 use crate::parser::YamlDocument;
 
@@ -85,15 +83,6 @@ impl<R: CodeRunner + Default> Networks<R> {
             network.print_globals();
         }
     }
-}
-
-fn get_value<'a>(hashmap: &'a YamlMap, key: &str) -> Option<&'a YamlElement> {
-    for (k, v) in hashmap {
-        if k == key {
-            return Some(v);
-        }
-    }
-    None
 }
 
 #[derive(Debug)]

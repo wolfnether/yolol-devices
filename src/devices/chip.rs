@@ -3,7 +3,6 @@ use std::ops::Deref;
 use crate::deserialize_field_name;
 use crate::field::Field;
 use crate::parser::YamlElement;
-use crate::parser::YamlMap;
 
 #[derive(Debug)]
 pub enum Chip<R: CodeRunner + Default> {
