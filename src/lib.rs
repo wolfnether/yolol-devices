@@ -4,11 +4,13 @@ use std::ops::Deref;
 use devices::chip::CodeRunner;
 use devices::Device;
 use field::Field;
-use yaml_rust::yaml::Hash;
-use yaml_rust::Yaml;
+use parser::YamlElement;
+
+use crate::parser::YamlDocument;
 
 pub mod devices;
 pub mod field;
+mod parser;
 pub mod value;
 
 #[derive(Debug)]
@@ -20,9 +22,12 @@ pub struct Networks<R: CodeRunner + Default> {
 
 impl<R: CodeRunner + Default> Networks<R> {
     pub fn deserialize(path: &str) -> Option<Self> {
-        let file = std::fs::read_to_string(path).ok()?;
-        let yaml = &yaml_rust::YamlLoader::load_from_str(&file).ok()?[0];
+        //let file = std::fs::read_to_string(path).ok()?;
+        let yaml_document = YamlDocument::new(path)?;
+        let yaml = &yaml_document[0];
+
         println!("Deserialize file version : {}", yaml["version"].as_str()?);
+
         let mut networks = BTreeMap::new();
         for network in yaml["networks"].as_vec()?.iter() {
             let name = network["name"].as_str()?;
@@ -33,12 +38,14 @@ impl<R: CodeRunner + Default> Networks<R> {
         }
         let mut relays = vec![];
         for relay in yaml["relays"].as_vec()?.iter() {
-            let src = get_value(relay["src"].as_hash()?, "name")?
+            let relay = relay.as_map()?;
+            let src = yaml_document.resolve_alias(&relay["src"])?["name"]
                 .as_str()?
                 .to_string();
-            let dst = get_value(relay["dst"].as_hash()?, "name")?
+            let dst = yaml_document.resolve_alias(&relay["dst"])?["name"]
                 .as_str()?
                 .to_string();
+
             relays.push((src, dst));
         }
         Some(Self { networks, relays })
@@ -76,15 +83,6 @@ impl<R: CodeRunner + Default> Networks<R> {
             network.print_globals();
         }
     }
-}
-
-fn get_value<'a>(hashmap: &'a Hash, key: &str) -> Option<&'a Yaml> {
-    for (k, v) in hashmap {
-        if k.as_str()? == key {
-            return Some(v);
-        }
-    }
-    None
 }
 
 #[derive(Debug)]
@@ -154,7 +152,7 @@ impl<R: CodeRunner + Default> Network<R> {
 }
 
 impl<R: CodeRunner + Default> Network<R> {
-    pub fn deserialize(yaml: &Yaml) -> Self {
+    pub fn deserialize(yaml: &YamlElement) -> Self {
         let mut devices = vec![];
         if let Some(v) = yaml["devices"].as_vec() {
             for i in v.iter() {

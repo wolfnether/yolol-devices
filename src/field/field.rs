@@ -17,7 +17,7 @@ impl Field {
 
     /// Set the field's name.
     pub fn set_name(&mut self, name: String) {
-        self.name = name;
+        self.name = name.to_lowercase();
     }
 }
 

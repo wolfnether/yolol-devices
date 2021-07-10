@@ -5,6 +5,7 @@ use super::chip::CodeRunner;
 use super::DeviceTrait;
 use crate::deserialize_field_name;
 use crate::field::Field;
+use crate::parser::YamlElement;
 
 #[derive(Debug, Default)]
 pub struct Rack<R: CodeRunner + Default> {
@@ -130,7 +131,7 @@ impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
         "rack".to_string()
     }
 
-    fn deserialize(&mut self, yaml: &yaml_rust::Yaml) {
+    fn deserialize(&mut self, yaml: &YamlElement) {
         deserialize_field_name!(self, current_state, yaml);
         deserialize_field_name!(self, on_state, yaml);
         deserialize_field_name!(self, off_state, yaml);
@@ -138,8 +139,8 @@ impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
 
         if let Some(tag) = yaml["module"].get_tag() {
             let modules = &yaml["module"];
-            match tag {
-                "socker_core" => {
+            match tag.as_str() {
+                "!socker_core" => {
                     let chip1 = modules["slot1"]
                         .get_tag()
                         .map(|tag| Chip::new(tag, &modules["slot1"]))
@@ -151,7 +152,7 @@ impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
                     let rack_module = RackModule::Socket(chip1, chip2);
                     self.module = rack_module;
                 }
-                "chip_core" => {
+                "!chip_core" => {
                     let chip1 = modules["slot1"]
                         .get_tag()
                         .map(|tag| Chip::new(tag, &modules["slot1"]))
@@ -167,7 +168,7 @@ impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
                     let rack_module = RackModule::Core(chip1, chip2, chip3);
                     self.module = rack_module;
                 }
-                "chip_reader" => {
+                "!chip_reader" => {
                     let chip1 = modules["slot1"]
                         .get_tag()
                         .map(|tag| Chip::new(tag, &modules["slot1"]))

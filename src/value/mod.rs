@@ -274,23 +274,3 @@ impl Display for YololValue {
         }
     }
 }
-
-#[test]
-fn concat_test_1() {
-    let a = 1;
-    let b = 1;
-    assert_eq!(
-        YololValue::from(a + b),
-        YololValue::from(a) + YololValue::from(b)
-    )
-}
-
-#[test]
-fn concat_test_2() {
-    let a = "Hello";
-    let b = 1;
-    assert_eq!(
-        YololValue::from("Hello1"),
-        YololValue::from(a) + YololValue::from(b)
-    )
-}

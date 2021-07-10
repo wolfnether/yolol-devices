@@ -1,9 +1,8 @@
 use std::ops::Deref;
 
-use yaml_rust::Yaml;
-
 use crate::deserialize_field_name;
 use crate::field::Field;
+use crate::parser::YamlElement;
 
 #[derive(Debug)]
 pub enum Chip<R: CodeRunner + Default> {
@@ -13,10 +12,10 @@ pub enum Chip<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Chip<R> {
-    pub fn new(chip_type: &str, yaml: &Yaml) -> Self {
-        match chip_type {
-            "memory_chip" => Self::Memory(MemoryChip::default()),
-            "yolol_chip" => {
+    pub fn new(chip_type: String, yaml: &YamlElement) -> Self {
+        match chip_type.as_str() {
+            "!memory_chip" => Self::Memory(MemoryChip::default()),
+            "!yolol_chip" => {
                 let mut chip = YololChip {
                     path: yaml["script"].as_str().map(|s| s.to_string()),
                     ..YololChip::default()
@@ -92,7 +91,7 @@ pub trait CodeRunner: Default {
     fn get_global(&self) -> Vec<Field>;
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct NoneRunner;
 impl CodeRunner for NoneRunner {
     fn parse(&mut self, _: &str) -> Option<()> {
