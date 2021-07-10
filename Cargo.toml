@@ -3,6 +3,10 @@ name = "yolol-devices"
 version = "0.2.4"
 edition = "2018"
 authors = ["alrianne"]
+description = "Starbase game's yolol devices library"
+license-file = "LICENSE"
+homepage = "https://github.com/wolfnether/yolol-devices"
+repository = "https://github.com/wolfnether/yolol-devices"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
