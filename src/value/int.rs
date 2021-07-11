@@ -139,6 +139,10 @@ impl ValueTrait for YololInt {
             }
         }
     }
+
+    fn not(&self) -> YololValue {
+        YololValue::from(self.0 == 0)
+    }
 }
 
 impl Add for &YololInt {
@@ -183,8 +187,13 @@ impl Rem for &YololInt {
     fn rem(self, rhs: Self) -> Self::Output {
         if rhs == &0.into() {
             return None;
-        }
-        Some(YololInt(self.0 % rhs.0))
+        } /*else if self < &0.into() {
+              Some(self.clone())
+          } else {
+              Some(YololInt(self.0 % rhs.0))
+          }*/
+        let d = self.0 / rhs.0 + (self.0 > 0) as i64;
+        Some(YololInt(self.0 - rhs.0 * d))
     }
 }
 

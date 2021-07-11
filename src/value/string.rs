@@ -79,6 +79,10 @@ impl ValueTrait for YololString {
     fn pow(&self, _: &YololValue) -> Option<YololValue> {
         None
     }
+
+    fn not(&self) -> YololValue {
+        false.into()
+    }
 }
 
 impl PartialEq for YololString {
