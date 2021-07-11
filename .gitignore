@@ -17,3 +17,7 @@ Cargo.lock
 # ignore vscode stuff
 
 .vscode
+
+#test file
+all.yaml
+src/main.rs
