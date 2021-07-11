@@ -37,16 +37,18 @@ impl<R: CodeRunner + Default> Networks<R> {
             networks.insert(name.to_string(), Network::deserialize(network));
         }
         let mut relays = vec![];
-        for relay in yaml["relays"].as_vec()?.iter() {
-            let relay = relay.as_map()?;
-            let src = yaml_document.resolve_alias(&relay["src"])?["name"]
-                .as_str()?
-                .to_string();
-            let dst = yaml_document.resolve_alias(&relay["dst"])?["name"]
-                .as_str()?
-                .to_string();
+        if let Some(_relays) = yaml["relays"].as_vec() {
+            for relay in _relays {
+                let relay = relay.as_map()?;
+                let src = yaml_document.resolve_alias(&relay["src"])?["name"]
+                    .as_str()?
+                    .to_string();
+                let dst = yaml_document.resolve_alias(&relay["dst"])?["name"]
+                    .as_str()?
+                    .to_string();
 
-            relays.push((src, dst));
+                relays.push((src, dst));
+            }
         }
         Some(Self { networks, relays })
     }

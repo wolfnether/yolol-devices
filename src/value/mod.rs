@@ -31,6 +31,7 @@ pub trait ValueTrait {
     fn tan(&self) -> Option<YololValue>;
     fn atan(&self) -> Option<YololValue>;
     fn pow(&self, e: &YololValue) -> Option<YololValue>;
+    fn not(&self) -> YololValue;
 }
 
 #[enum_dispatch(ValueTrait)]
