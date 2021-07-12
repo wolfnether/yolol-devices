@@ -4,8 +4,8 @@ use super::chip::Chip;
 use super::chip::CodeRunner;
 use super::DeviceTrait;
 use crate::deserialize_field_name;
+use crate::deserializer::Deserializer;
 use crate::field::Field;
-use crate::parser::YamlElement;
 
 #[derive(Debug, Default)]
 pub struct Rack<R: CodeRunner + Default> {
@@ -131,47 +131,50 @@ impl<R: CodeRunner + Default> DeviceTrait for Rack<R> {
         "rack".to_string()
     }
 
-    fn deserialize(&mut self, yaml: &YamlElement) {
-        deserialize_field_name!(self, current_state, yaml);
-        deserialize_field_name!(self, on_state, yaml);
-        deserialize_field_name!(self, off_state, yaml);
-        deserialize_field_name!(self, button, yaml);
+    fn deserialize<D>(&mut self, deserializer: &D)
+    where
+        D: Deserializer<D, Output = D>,
+    {
+        deserialize_field_name!(self, current_state, deserializer);
+        deserialize_field_name!(self, on_state, deserializer);
+        deserialize_field_name!(self, off_state, deserializer);
+        deserialize_field_name!(self, button, deserializer);
 
-        if let Some(tag) = yaml["module"].get_tag() {
-            let modules = &yaml["module"];
+        if let Some(tag) = deserializer["module".to_string()].get_type() {
+            let modules = &deserializer["module".to_string()];
             match tag.as_str() {
                 "!socker_core" => {
-                    let chip1 = modules["slot1"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                    let chip1 = modules["slot1".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot1".to_string()]))
                         .unwrap_or(Chip::None);
-                    let chip2 = modules["slot2"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot2"]))
+                    let chip2 = modules["slot2".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot2".to_string()]))
                         .unwrap_or(Chip::None);
                     let rack_module = RackModule::Socket(chip1, chip2);
                     self.module = rack_module;
                 }
                 "!chip_core" => {
-                    let chip1 = modules["slot1"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                    let chip1 = modules["slot1".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot1".to_string()]))
                         .unwrap_or(Chip::None);
-                    let chip2 = modules["slot2"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot2"]))
+                    let chip2 = modules["slot2".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot2".to_string()]))
                         .unwrap_or(Chip::None);
-                    let chip3 = modules["slot3"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot3"]))
+                    let chip3 = modules["slot3".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot3".to_string()]))
                         .unwrap_or(Chip::None);
                     let rack_module = RackModule::Core(chip1, chip2, chip3);
                     self.module = rack_module;
                 }
                 "!chip_reader" => {
-                    let chip1 = modules["slot1"]
-                        .get_tag()
-                        .map(|tag| Chip::new(tag, &modules["slot1"]))
+                    let chip1 = modules["slot1".to_string()]
+                        .get_type()
+                        .map(|tag| Chip::deserialize(tag, &modules["slot1".to_string()]))
                         .unwrap_or(Chip::None);
                     let rack_module = RackModule::Reader(chip1);
                     self.module = rack_module;

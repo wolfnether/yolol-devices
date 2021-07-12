@@ -1,8 +1,8 @@
 use std::ops::Deref;
 
 use crate::deserialize_field_name;
+use crate::deserializer::Deserializer;
 use crate::field::Field;
-use crate::parser::YamlElement;
 
 #[derive(Debug)]
 pub enum Chip<R: CodeRunner + Default> {
@@ -12,7 +12,26 @@ pub enum Chip<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Chip<R> {
-    pub fn new(chip_type: String, yaml: &YamlElement) -> Self {
+    pub fn deserialize<D>(chip_type: String, deserializer: &D) -> Self
+    where
+        D: Deserializer<D, Output = D>,
+    {
+        match chip_type.as_str() {
+            "!memory_chip" => Self::Memory(MemoryChip::default()),
+            "!yolol_chip" => {
+                let mut chip = YololChip {
+                    path: deserializer["script".to_string()]
+                        .as_str()
+                        .map(|s| s.to_string()),
+                    ..YololChip::default()
+                };
+                deserialize_field_name!(chip, chip_wait, deserializer);
+                Self::Yolol(chip)
+            }
+            _ => Self::None,
+        }
+    }
+    /*pub fn new(chip_type: String, yaml: &YamlElement) -> Self {
         match chip_type.as_str() {
             "!memory_chip" => Self::Memory(MemoryChip::default()),
             "!yolol_chip" => {
@@ -25,7 +44,7 @@ impl<R: CodeRunner + Default> Chip<R> {
             }
             _ => Self::None,
         }
-    }
+    }*/
 
     pub fn load(&mut self) {
         if let Self::Yolol(chip) = self {

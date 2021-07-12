@@ -4,13 +4,10 @@ use std::ops::Deref;
 use devices::chip::CodeRunner;
 use devices::Device;
 use field::Field;
-use parser::YamlElement;
 
-use crate::parser::YamlDocument;
-
+pub mod deserializer;
 pub mod devices;
 pub mod field;
-mod parser;
 pub mod value;
 
 #[derive(Debug)]
@@ -21,7 +18,7 @@ pub struct Networks<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Networks<R> {
-    pub fn deserialize(path: &str) -> Option<Self> {
+    /*pub fn deserialize(path: &str) -> Option<Self> {
         //let file = std::fs::read_to_string(path).ok()?;
         let yaml_document = YamlDocument::new(path)?;
         let yaml = &yaml_document[0];
@@ -51,7 +48,7 @@ impl<R: CodeRunner + Default> Networks<R> {
             }
         }
         Some(Self { networks, relays })
-    }
+    }*/
 
     pub fn parse_all_chip_file(&mut self) {
         for network in self.networks.values_mut() {
@@ -154,7 +151,7 @@ impl<R: CodeRunner + Default> Network<R> {
 }
 
 impl<R: CodeRunner + Default> Network<R> {
-    pub fn deserialize(yaml: &YamlElement) -> Self {
+    /*pub fn deserialize(yaml: &YamlElement) -> Self {
         let mut devices = vec![];
         if let Some(v) = yaml["devices"].as_vec() {
             for i in v.iter() {
@@ -168,5 +165,5 @@ impl<R: CodeRunner + Default> Network<R> {
             devices,
             globals: vec![],
         }
-    }
+    }*/
 }

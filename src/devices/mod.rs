@@ -1,5 +1,7 @@
 pub mod chip;
 mod rack;
+use std::ops::Index;
+
 use concat_idents::concat_idents;
 use convert_case::Case;
 use convert_case::Casing;
@@ -7,8 +9,8 @@ use enum_dispatch::enum_dispatch;
 
 use self::chip::CodeRunner;
 pub use self::rack::Rack;
+use crate::deserializer::Deserializer;
 use crate::field::Field;
-use crate::parser::YamlElement;
 use crate::value::YololValue;
 
 //thx https://github.com/martindevans/YololShipSystemSpec
@@ -18,7 +20,9 @@ pub trait DeviceTrait {
     fn get_field(&self, field: &str) -> Option<&YololValue>;
     fn get_field_mut(&mut self, field: &str) -> Option<&mut YololValue>;
     fn get_device_name(&self) -> String;
-    fn deserialize(&mut self, yaml: &YamlElement);
+    fn deserialize<D>(&mut self, deserializer: &D)
+    where
+        D: Deserializer<D, Output = D> + Index<String>;
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -53,7 +57,7 @@ pub enum Device<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Device<R> {
-    pub fn deserialize(yaml: &YamlElement) -> Option<Self> {
+    /*pub fn deserialize(yaml: &YamlElement) -> Option<Self> {
         let device_type = yaml.get_tag().expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
 
@@ -92,17 +96,17 @@ impl<R: CodeRunner + Default> Device<R> {
         } else {
             None
         }
-    }
+    }*/
 }
 
 #[macro_export]
 macro_rules! deserialize_field_name {
-    ($device:ident, $name:ident, $yaml:ident) => {{
+    ($device:ident, $name:ident, $deserializer:ident) => {{
         use convert_case::Case;
         use convert_case::Casing;
         let name = stringify!($name).to_case(Case::Pascal);
         $device.$name.set_name(
-            $yaml[name.as_str()]
+            $deserializer[name.to_string()]
                 .as_str()
                 .unwrap_or(name.as_str())
                 .to_string(),
@@ -131,8 +135,12 @@ macro_rules! make_device {
         }
 
         impl DeviceTrait for $name{
-            fn deserialize(&mut self,yaml: &YamlElement) {
-                $(deserialize_field_name!(self, $field, yaml);)+
+            fn deserialize<D>(&mut self, deserializer: &D)
+            where
+                D: Deserializer<D, Output = D> + Index<String>,
+                <D as Index<String>>::Output: Deserializer<D, Output = D> + Index<String>,
+            {
+                $(deserialize_field_name!(self, $field, deserializer);)+
             }
 
             fn get_device_name(&self) -> String {
