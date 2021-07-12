@@ -36,12 +36,8 @@ impl<R: CodeRunner + Default> Networks<R> {
         if let Some(_relays) = deserializer["relays".to_string()].as_vec() {
             for relay in _relays {
                 let relay = relay.as_map()?;
-                let src = relay["src".to_string()]["name".to_string()]
-                    .as_str()?
-                    .to_string();
-                let dst = relay["dst".to_string()]["name".to_string()]
-                    .as_str()?
-                    .to_string();
+                let src = relay["src"]["name".to_string()].as_str()?.to_string();
+                let dst = relay["dst"]["name".to_string()].as_str()?.to_string();
 
                 relays.push((src, dst));
             }

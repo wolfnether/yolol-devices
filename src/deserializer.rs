@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::ops::Index;
 
 pub trait Deserializer<D>: Index<String>
@@ -6,7 +7,7 @@ where
 {
     fn get_field(&self, key: &str) -> Option<&D>;
     fn get_type(&self) -> Option<String>;
-    fn as_map(&self) -> Option<&D>;
+    fn as_map(&self) -> Option<&BTreeMap<String, &D>>;
     fn as_vec(&self) -> Option<Vec<&D>>;
     fn as_str(&self) -> Option<&str>;
 }
