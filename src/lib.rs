@@ -1,6 +1,8 @@
 use std::collections::BTreeMap;
 use std::ops::Deref;
+use std::ops::Index;
 
+use deserializer::Deserializer;
 use devices::chip::CodeRunner;
 use devices::Device;
 use field::Field;
@@ -18,29 +20,26 @@ pub struct Networks<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Networks<R> {
-    /*pub fn deserialize(path: &str) -> Option<Self> {
-        //let file = std::fs::read_to_string(path).ok()?;
-        let yaml_document = YamlDocument::new(path)?;
-        let yaml = &yaml_document[0];
-
-        println!("Deserialize file version : {}", yaml["version"].as_str()?);
-
+    pub fn deserialize<D>(deserializer: &D) -> Option<Self>
+    where
+        D: Deserializer<D, Output = D> + Index<String>,
+    {
         let mut networks = BTreeMap::new();
-        for network in yaml["networks"].as_vec()?.iter() {
-            let name = network["name"].as_str()?;
+        for network in deserializer["networks".to_string()].as_vec()?.iter() {
+            let name = network["name".to_string()].as_str()?;
 
             println!("deserialize network : {}", name);
 
-            networks.insert(name.to_string(), Network::deserialize(network));
+            networks.insert(name.to_string(), Network::deserialize(*network));
         }
         let mut relays = vec![];
-        if let Some(_relays) = yaml["relays"].as_vec() {
+        if let Some(_relays) = deserializer["relays".to_string()].as_vec() {
             for relay in _relays {
                 let relay = relay.as_map()?;
-                let src = yaml_document.resolve_alias(&relay["src"])?["name"]
+                let src = relay["src".to_string()]["name".to_string()]
                     .as_str()?
                     .to_string();
-                let dst = yaml_document.resolve_alias(&relay["dst"])?["name"]
+                let dst = relay["dst".to_string()]["name".to_string()]
                     .as_str()?
                     .to_string();
 
@@ -48,7 +47,7 @@ impl<R: CodeRunner + Default> Networks<R> {
             }
         }
         Some(Self { networks, relays })
-    }*/
+    }
 
     pub fn parse_all_chip_file(&mut self) {
         for network in self.networks.values_mut() {
@@ -151,11 +150,14 @@ impl<R: CodeRunner + Default> Network<R> {
 }
 
 impl<R: CodeRunner + Default> Network<R> {
-    /*pub fn deserialize(yaml: &YamlElement) -> Self {
+    pub fn deserialize<D>(deserializer: &D) -> Self
+    where
+        D: Deserializer<D, Output = D> + Index<String>,
+    {
         let mut devices = vec![];
-        if let Some(v) = yaml["devices"].as_vec() {
+        if let Some(v) = deserializer["devices".to_string()].as_vec() {
             for i in v.iter() {
-                let device = Device::deserialize(i);
+                let device = Device::deserialize(*i);
                 if let Some(device) = device {
                     devices.push(device);
                 }
@@ -165,5 +167,5 @@ impl<R: CodeRunner + Default> Network<R> {
             devices,
             globals: vec![],
         }
-    }*/
+    }
 }

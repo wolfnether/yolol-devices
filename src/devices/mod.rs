@@ -57,8 +57,13 @@ pub enum Device<R: CodeRunner + Default> {
 }
 
 impl<R: CodeRunner + Default> Device<R> {
-    /*pub fn deserialize(yaml: &YamlElement) -> Option<Self> {
-        let device_type = yaml.get_tag().expect("Need a type for deserializing");
+    pub fn deserialize<D>(deserializer: &D) -> Option<Self>
+    where
+        D: Deserializer<D, Output = D> + Index<String>,
+    {
+        let device_type = deserializer
+            .get_type()
+            .expect("Need a type for deserializing");
         println!("trying to deserialize {}", device_type);
 
         let device: Option<Device<R>> = match device_type.as_str() {
@@ -91,12 +96,12 @@ impl<R: CodeRunner + Default> Device<R> {
         };
 
         if let Some(mut device) = device {
-            device.deserialize(yaml);
+            device.deserialize(deserializer);
             Some(device)
         } else {
             None
         }
-    }*/
+    }
 }
 
 #[macro_export]

@@ -7,7 +7,7 @@ where
     fn get_field(&self, key: &str) -> Option<&D>;
     fn get_type(&self) -> Option<String>;
     fn as_map(&self) -> Option<&D>;
-    fn as_set(&self) -> Option<Vec<&D>>;
+    fn as_vec(&self) -> Option<Vec<&D>>;
     fn as_str(&self) -> Option<&str>;
 }
 
