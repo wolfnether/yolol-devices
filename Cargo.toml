@@ -13,4 +13,3 @@ repository = "https://github.com/wolfnether/yolol-devices"
 enum_dispatch = "0.3.7"
 concat-idents = "1.1.3"
 convert_case = "0.4.0"
-strum = { version = "0.21", features = ["derive"] }
